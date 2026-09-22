@@ -1,0 +1,301 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   Design tokens. These mirror tailwind.config.ts — the Tailwind
+   names are for markup, these variables for raw CSS below.
+   ============================================================ */
+:root {
+  --ink: #05070A;
+  --char: #0C1118;
+  --char2: #11171F;
+  --gold: #E1A13F;
+  --gold-pale: #EFCFA0;
+  --cream: #FFF9F0;
+  --muted: #8D97A3;
+  --rule: #1D2632;
+  --pad: clamp(1.25rem, 5vw, 4.5rem);
+  --shell: 1320px;
+
+  /* Height the fixed nav occupies. Anything that could slide beneath
+     it clears this value rather than guessing. */
+  --navh: 86px;
+}
+@media (max-width: 959px) { :root { --navh: 78px; } }
+
+/* NOTE: never set overflow-x: hidden on html or body. It turns them into
+   scroll containers, which silently kills position: sticky for every
+   descendant — pinned sections stop pinning and scroll straight past.
+   overflow-x: clip prevents sideways scroll without that side effect. */
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  overflow-x: clip;
+  background: var(--ink);
+  color: #fff;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 17px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Fine grain over everything. Keep the z-index below any 3D canvas
+   added later — compositing a full-screen overlay above WebGL costs
+   a repaint every frame. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.shell { max-width: var(--shell); margin: 0 auto; padding-left: var(--pad); padding-right: var(--pad); }
+
+/* Soft light source behind key content. Flat black reads cheap. */
+.glow { position: relative; isolation: isolate; }
+.glow::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: 50%;
+  top: 0;
+  translate: -50% -35%;
+  width: min(900px, 120vw);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(225,161,63,.13) 0%, rgba(225,161,63,0) 62%);
+}
+
+/* ============================================================
+   Type. Serif carries display, sans carries everything else.
+   ============================================================ */
+h1, h2, h3 {
+  margin: 0;
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 600;
+  letter-spacing: -0.018em;
+  line-height: 1.08;
+}
+h4 { margin: 0; font-weight: 600; letter-spacing: -0.015em; }
+p { margin: 0 0 1.1rem; color: #AEB8C2; }
+p:last-child { margin-bottom: 0; }
+
+.display { font-size: clamp(2rem, 5.2vw, 4.3rem); line-height: 1.04; margin: 0 0 1.8rem; max-width: 16ch; }
+.display-lg { font-size: clamp(2.4rem, 6.6vw, 6rem); line-height: 1.02; letter-spacing: -0.022em; max-width: 17ch; }
+.accent { font-style: italic; color: var(--gold); }
+.sub { font-size: clamp(.98rem, 1.4vw, 1.1rem); color: #AFBAC4; max-width: 52ch; }
+
+/* Small caps label with the gold rule. */
+.kick {
+  display: flex; align-items: center; gap: .8rem;
+  font-family: var(--font-sans), sans-serif;
+  font-size: .66rem; letter-spacing: .24em; text-transform: uppercase;
+  color: var(--gold); font-weight: 600; margin-bottom: 1.8rem;
+}
+.kick::before { content: ""; width: 34px; height: 1px; background: var(--gold); }
+
+/* ============================================================
+   Reveal. Lines rise into place behind a mask; the mask has to clip
+   vertically, which also clips descenders — hence the padding and
+   the equal negative margin.
+   ============================================================ */
+.rv { display: block; overflow: hidden; padding-bottom: .14em; margin-bottom: -.14em; }
+.rv > * { display: block; transform: translateY(115%); transition: transform .95s cubic-bezier(.22,1,.36,1); }
+.is-on .rv > * { transform: translateY(0); }
+.fade { opacity: 0; transform: translateY(16px); transition: opacity .8s ease, transform .8s cubic-bezier(.22,1,.36,1); }
+.is-on .fade { opacity: 1; transform: none; }
+.d1 { transition-delay: .08s; } .d2 { transition-delay: .16s; }
+.d3 { transition-delay: .26s; } .d4 { transition-delay: .36s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .rv > *, .fade { transform: none !important; opacity: 1 !important; transition: none !important; }
+}
+
+/* ============================================================
+   Buttons
+   ============================================================ */
+.btn {
+  display: inline-flex; align-items: center; gap: .7rem;
+  padding: 1.05rem 1.7rem;
+  font-family: var(--font-sans), sans-serif;
+  font-weight: 600; font-size: .76rem; letter-spacing: .14em; text-transform: uppercase;
+  border: 1px solid var(--gold); color: var(--ink); background: var(--gold);
+  position: relative; overflow: hidden; isolation: isolate;
+  transition: color .3s; cursor: pointer;
+}
+.btn::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; background: var(--ink);
+  transform: translateY(101%); transition: transform .38s cubic-bezier(.4,0,.2,1);
+}
+.btn:hover { color: var(--gold); }
+.btn:hover::before { transform: translateY(0); }
+.btn .arw { transition: transform .3s; }
+.btn:hover .arw { transform: translateX(4px); }
+
+.lnk {
+  display: inline-flex; align-items: center; gap: .6rem;
+  font-family: var(--font-sans), sans-serif;
+  font-size: .72rem; letter-spacing: .16em; text-transform: uppercase;
+  font-weight: 600; color: var(--gold);
+}
+.lnk span { transition: transform .3s; }
+.lnk:hover span { transform: translateX(5px); }
+
+/* ============================================================
+   Pinned scroll section.
+   ============================================================ */
+.pinsec { position: relative; background: var(--ink); }
+.pin {
+  position: sticky; top: 0; height: 100vh;
+  display: flex; flex-direction: column; overflow: hidden;
+  contain: layout paint;
+}
+.pin-head { padding-top: calc(var(--navh) + clamp(1rem, 3vh, 2.2rem)); }
+.pin-body {
+  flex: 1; min-height: 0;
+  display: grid; grid-template-columns: 1fr; align-items: center; gap: 1.5rem;
+  max-width: var(--shell); margin: 0 auto; width: 100%;
+  padding: 0 var(--pad) clamp(2rem, 5vh, 3rem);
+}
+@media (min-width: 900px) { .pin-body { grid-template-columns: 1fr 1fr; gap: 4rem; } }
+
+.steps { position: relative; min-height: 250px; }
+.step {
+  position: absolute; inset: 0; opacity: 0; transform: translateY(10px);
+  transition: opacity .34s ease, transform .34s ease;
+  display: flex; flex-direction: column; justify-content: center;
+}
+.step[data-on="true"] { opacity: 1; transform: none; }
+.step .n {
+  font-family: var(--font-sans), sans-serif;
+  font-size: .66rem; letter-spacing: .2em; color: var(--gold);
+  font-weight: 600; margin-bottom: 1rem;
+}
+.step h3 { font-size: clamp(1.5rem, 3.4vw, 2.4rem); margin-bottom: 1rem; line-height: 1.12; }
+.step p { font-size: clamp(.95rem, 1.5vw, 1.05rem); max-width: 40ch; margin: 0; }
+
+/* Capped so it can't outgrow its column on a wide monitor. */
+.viz {
+  position: relative; width: 100%;
+  max-width: min(430px, 40vw);
+  aspect-ratio: 1; max-height: min(46vh, 430px);
+  justify-self: center; margin: 0 auto;
+}
+.viz svg { width: 100%; height: 100%; overflow: hidden; display: block; }
+@media (max-height: 760px) {
+  .viz { max-height: 34vh; max-width: min(330px, 34vw); }
+  .step h3 { font-size: clamp(1.2rem, 2.6vw, 1.7rem); }
+}
+
+.road { fill: none; stroke: #1B2634; stroke-width: 2; }
+.trace { fill: none; stroke: var(--gold); stroke-width: 2; will-change: stroke-dashoffset; }
+.node { fill: var(--ink); stroke: #2A3746; stroke-width: 2; }
+.node[data-on="true"] { fill: var(--gold); stroke: var(--gold); }
+.halo { fill: none; stroke: var(--gold); stroke-width: 1.2; opacity: 0; }
+.nlabel {
+  font-family: var(--font-sans), sans-serif;
+  font-size: 12px; letter-spacing: .14em; fill: #55626F; text-transform: uppercase;
+}
+.nlabel[data-on="true"] { fill: var(--gold-pale); }
+
+.ticks {
+  display: flex; gap: .5rem;
+  padding: 0 var(--pad) clamp(1.5rem, 4vh, 2.5rem);
+  max-width: var(--shell); margin: 0 auto; width: 100%;
+}
+.tick { flex: 1; height: 2px; background: var(--rule); position: relative; overflow: hidden; }
+.tick i { position: absolute; inset: 0; background: var(--gold); transform: scaleX(0); transform-origin: left; transition: transform .2s linear; }
+
+/* ============================================================
+   Marquee
+   ============================================================ */
+.marq { border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); padding: 1.9rem 0; overflow: hidden; background: var(--char); }
+.marq-track { display: flex; gap: 4.5rem; width: max-content; animation: slide 44s linear infinite; }
+.marq:hover .marq-track { animation-play-state: paused; }
+.marq span { font-size: .92rem; letter-spacing: .14em; text-transform: uppercase; font-weight: 600; color: #3E4A57; white-space: nowrap; transition: color .3s; }
+.marq span:hover { color: var(--gold-pale); }
+@keyframes slide { to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) { .marq-track { animation: none; flex-wrap: wrap; width: auto; } }
+
+/* ============================================================
+   Sticky stacking cards
+   ============================================================ */
+.scard {
+  position: sticky;
+  background: var(--char2); border: 1px solid var(--rule);
+  padding: clamp(1.8rem, 4vw, 3.4rem); margin-bottom: 1.4rem;
+  display: grid; gap: 1.6rem; grid-template-columns: 1fr;
+}
+@media (min-width: 880px) { .scard { grid-template-columns: .42fr 1fr; gap: 3.5rem; align-items: start; } }
+.scard .idx { font-family: var(--font-sans), sans-serif; font-size: .66rem; letter-spacing: .2em; color: var(--gold); font-weight: 600; }
+.scard h3 { font-size: clamp(1.5rem, 3.2vw, 2.3rem); margin: .7rem 0 0; }
+.scard p { margin: 0 0 1.6rem; font-size: 1rem; }
+
+/* ============================================================
+   Horizontal rail
+   ============================================================ */
+.hrail {
+  display: flex; gap: 1.2rem; overflow-x: auto;
+  scroll-snap-type: x mandatory; padding: 0 var(--pad) 1.6rem;
+  scrollbar-width: thin; scrollbar-color: var(--rule) transparent;
+}
+.hrail::-webkit-scrollbar { height: 2px; }
+.hrail::-webkit-scrollbar-thumb { background: var(--rule); }
+.hcard { flex: 0 0 min(330px, 78vw); scroll-snap-align: start; border-top: 2px solid var(--rule); padding-top: 1.3rem; transition: border-color .35s; }
+.hcard:hover { border-top-color: var(--gold); }
+.hcard h4 { font-size: 1.15rem; margin: 0 0 .7rem; }
+.hcard p { font-size: .88rem; color: var(--muted); margin: 0 0 1.1rem; line-height: 1.5; }
+.hcard ul { list-style: none; margin: 0; padding: 0; display: grid; gap: .35rem; }
+.hcard li { font-size: .82rem; color: #7B8692; position: relative; padding-left: .95rem; }
+.hcard li::before { content: ""; position: absolute; left: 0; top: .6em; width: 4px; height: 4px; background: var(--gold); }
+
+/* ============================================================
+   Hover rows
+   ============================================================ */
+.rows { border-top: 1px solid var(--rule); }
+.hrow {
+  display: flex; align-items: center; justify-content: space-between; gap: 2rem;
+  padding: clamp(1.5rem, 3.5vw, 2.4rem) 0; border-bottom: 1px solid var(--rule);
+  position: relative; transition: padding-left .4s cubic-bezier(.22,1,.36,1);
+}
+.hrow:hover { padding-left: 1.4rem; }
+.hrow::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: var(--gold); transform: scaleY(0); transition: transform .4s cubic-bezier(.22,1,.36,1); }
+.hrow:hover::before { transform: scaleY(1); }
+.hrow h4 { font-family: var(--font-display), serif; font-size: clamp(1.15rem, 2.6vw, 1.75rem); transition: color .3s; }
+.hrow:hover h4 { color: var(--gold); }
+.hrow .meta { font-size: .76rem; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+
+/* ============================================================
+   Misc
+   ============================================================ */
+.topline { border-top: 2px solid var(--gold); padding-top: 1.2rem; }
+.topline h3 { font-size: 1.1rem; }
+.topline p { font-size: .92rem; color: var(--muted); margin: .6rem 0 0; }
+
+.checks { list-style: none; margin: 0; padding: 0; display: grid; gap: .55rem; }
+.checks li { position: relative; padding-left: 1.1rem; font-size: .92rem; color: #AEB8C2; }
+.checks li::before { content: ""; position: absolute; left: 0; top: .62em; width: 5px; height: 5px; background: var(--gold); }
+
+.quote { border-left: 2px solid var(--gold); padding-left: 1.6rem; display: flex; flex-direction: column; }
+.quote blockquote { margin: 0 0 1.4rem; font-size: 1rem; line-height: 1.55; color: #C3CBD4; }
+.quote .who { margin-top: auto; }
+.quote .name { font-weight: 600; font-size: .92rem; }
+.quote .role { font-size: .79rem; color: var(--muted); margin-top: .2rem; line-height: 1.35; }
+
+.ph {
+  background: repeating-linear-gradient(45deg, #0D131B 0 10px, #101823 10px 20px);
+  border: 1px solid var(--rule);
+  display: flex; align-items: center; justify-content: center;
+  color: #46525F; font-size: .68rem; letter-spacing: .16em; text-transform: uppercase;
+  text-align: center; padding: 1rem;
+}
+
+.field { width: 100%; background: var(--char); border: 1px solid var(--rule); color: #fff; padding: .9rem; font-family: inherit; font-size: .95rem; }
+.field:focus { outline: none; border-color: var(--gold); }
+.field-label { display: block; font-size: .64rem; letter-spacing: .18em; text-transform: uppercase; color: var(--gold); font-weight: 600; margin-bottom: .5rem; }
