@@ -12,7 +12,7 @@ export default function ServiceShell({
 }) {
   return (
     <>
-      <Reveal as="header" className="glow border-b border-rule">
+      <Reveal as="header" immediate className="glow border-b border-rule">
         <div
           className="shell"
           style={{

@@ -106,10 +106,18 @@ p:last-child { margin-bottom: 0; }
    the equal negative margin.
    ============================================================ */
 .rv { display: block; overflow: hidden; padding-bottom: .14em; margin-bottom: -.14em; }
-.rv > * { display: block; transform: translateY(115%); transition: transform .95s cubic-bezier(.22,1,.36,1); }
-.is-on .rv > * { transform: translateY(0); }
-.fade { opacity: 0; transform: translateY(16px); transition: opacity .8s ease, transform .8s cubic-bezier(.22,1,.36,1); }
-.is-on .fade { opacity: 1; transform: none; }
+.rv > * { display: block; transition: transform .95s cubic-bezier(.22,1,.36,1); }
+.fade { transition: opacity .8s ease, transform .8s cubic-bezier(.22,1,.36,1); }
+
+/* IMPORTANT: content is visible by default. The hidden starting state only
+   applies under html.js, which a tiny inline script in layout.tsx adds. If
+   JavaScript fails, is slow, or is switched off, every word still shows — it
+   just doesn't animate. Hiding first and revealing with JS means one broken
+   script leaves the page blank. */
+html.js .rv > * { transform: translateY(115%); }
+html.js .fade { opacity: 0; transform: translateY(16px); }
+html.js .is-on .rv > * { transform: translateY(0); }
+html.js .is-on .fade { opacity: 1; transform: none; }
 .d1 { transition-delay: .08s; } .d2 { transition-delay: .16s; }
 .d3 { transition-delay: .26s; } .d4 { transition-delay: .36s; }
 

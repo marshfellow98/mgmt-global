@@ -39,6 +39,16 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${display.variable} ${sans.variable}`}>
+      <head>
+        {/* Marks the document as scripted BEFORE first paint, which switches
+            on the hidden starting state for reveal animations. If this never
+            runs, content simply shows without animating — it is never blank. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: "document.documentElement.classList.add('js')",
+          }}
+        />
+      </head>
       <body>
         <Nav />
         <main>{children}</main>

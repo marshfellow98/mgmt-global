@@ -1,0 +1,26 @@
+# Render Blueprint.
+# In Render: New → Blueprint → pick this repo. Every setting below is read
+# from this file, so there are no dropdowns to get wrong.
+services:
+  - type: web              # NOT a static site — this app renders server-side
+    name: mgmtglobal
+    runtime: node
+    plan: starter          # $7/mo. Free web services sleep after 15 minutes
+                           # idle and take 30-60s to wake, which is a poor
+                           # first impression for someone arriving from LinkedIn.
+    region: oregon
+    branch: main
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      # Requested from Recruiterflow support - not self-serve. Leave unset
+      # until you have it; the careers page renders an empty board rather
+      # than failing.
+      - key: RECRUITERFLOW_API_KEY
+        sync: false
+      - key: BUTTONDOWN_API_KEY
+        sync: false

@@ -15,7 +15,7 @@ const HERO_POSTER = 'https://zktech.dz/MGMT/wp-content/uploads/2026/07/Hero-Home
 export default function Home() {
   return (
     <>
-      <Reveal as="header" className="relative flex min-h-[100svh] items-end overflow-hidden">
+      <Reveal as="header" immediate className="relative flex min-h-[100svh] items-end overflow-hidden">
         <div className="absolute inset-0 bg-[#0A0F16] motion-reduce:hidden">
           <video
             autoPlay muted loop playsInline poster={HERO_POSTER}
