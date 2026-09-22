@@ -16,7 +16,7 @@ export default function Home() {
   return (
     <>
       <Reveal as="header" immediate className="relative flex min-h-[100svh] items-end overflow-hidden">
-        <div className="absolute inset-0 bg-[#0A0F16] motion-reduce:hidden">
+        <div className="hero-media absolute inset-0 bg-[#0A0F16] motion-reduce:hidden">
           <video
             autoPlay muted loop playsInline poster={HERO_POSTER}
             className="h-full w-full object-cover"

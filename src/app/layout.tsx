@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Schibsted_Grotesk, Source_Serif_4 } from 'next/font/google';
 import Nav from '@/components/Nav';
 import Footer from '@/components/Footer';
+import SmoothScroll from '@/components/SmoothScroll';
 import './globals.css';
 
 /* Serif carries display type and the wordmark — it matches the logo's voice.
@@ -50,6 +51,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body>
+        <SmoothScroll />
         <Nav />
         <main>{children}</main>
         <Footer />
