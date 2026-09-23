@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Wordmark } from './Nav';
+import { Wordmark } from './Wordmark';
 import { CONTACT } from '@/lib/content';
 
 const NAV = [
