@@ -63,10 +63,12 @@ export default function Home() {
             <Magnetic href="/contact" className="btn">
               Book a Consultation <span className="arw">&rarr;</span>
             </Magnetic>
-            <p className="m-0 max-w-[19ch] text-[.8rem] leading-snug text-muted">
-              Exploring your next move?
+            <p className="m-0 max-w-[22ch] text-[.8rem] leading-snug text-muted">
+              Exploring your next move, quietly?
               <br />
-              <Link href="/contact" className="lnk mt-2">Start here <span>&rarr;</span></Link>
+              <Link href="/confidential" className="lnk mt-2">
+                In confidence <span>&rarr;</span>
+              </Link>
             </p>
           </div>
         </div>

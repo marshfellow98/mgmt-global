@@ -9,6 +9,7 @@ const NAV = [
   ['/services/contingent-submittal', 'Contingent Submittal'],
   ['/services/ma-consulting', 'M&A Consulting'],
   ['/careers', 'Careers'],
+  ['/confidential', 'In Confidence'],
   ['/contact', 'Contact'],
 ];
 

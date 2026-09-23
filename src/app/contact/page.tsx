@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import Reveal from '@/components/Reveal';
 import Line from '@/components/Line';
+import Form from '@/components/Form';
 import { CONTACT, CONTACT_TOPICS } from '@/lib/content';
 
 export const metadata: Metadata = {
@@ -43,30 +45,43 @@ export default function Contact() {
             <h2 className="display mb-4 text-[clamp(1.6rem,3.6vw,2.4rem)]">
               <Line>Send us a message.</Line>
             </h2>
-            <p className="fade d2 mb-9">
+            <p className="fade d2 mb-4">
               For general inquiries, fill out the form and we’ll get back to you within one
               business day.
             </p>
-            <form action="/api/contact" method="post" className="fade d3 grid gap-4 sm:grid-cols-2">
-              <Field label="Name" name="name" required />
-              <Field label="Company" name="company" />
-              <Field label="Email" name="email" type="email" required />
-              <Field label="Phone number" name="phone" type="tel" />
-              <div className="sm:col-span-2">
-                <label className="field-label" htmlFor="topic">Choose a topic</label>
-                <select id="topic" name="topic" className="field" defaultValue="">
-                  <option value="" disabled>Select one…</option>
-                  {CONTACT_TOPICS.map((t) => <option key={t}>{t}</option>)}
-                </select>
-              </div>
-              <div className="sm:col-span-2">
-                <label className="field-label" htmlFor="message">How can we help?</label>
-                <textarea id="message" name="message" className="field min-h-[130px] resize-y" />
-              </div>
-              <div className="sm:col-span-2">
-                <button type="submit" className="btn">Send message <span className="arw">&rarr;</span></button>
-              </div>
-            </form>
+            <p className="fade d2 mb-9 max-w-[48ch] text-[.88rem] text-muted">
+              Exploring a move and would rather not put your details in a form?{' '}
+              <Link href="/confidential" className="text-gold underline-offset-4 hover:underline">
+                Reach us in confidence
+              </Link>{' '}
+              instead.
+            </p>
+            <div className="fade d3">
+              <Form
+                action="/api/contact"
+                submitLabel="Send message"
+                successTitle="Message sent."
+                successBody="We’ll come back to you within one business day."
+              >
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Field label="Name" name="name" required />
+                  <Field label="Company" name="company" />
+                  <Field label="Email" name="email" type="email" required />
+                  <Field label="Phone number" name="phone" type="tel" />
+                  <div className="sm:col-span-2">
+                    <label className="field-label" htmlFor="topic">Choose a topic</label>
+                    <select id="topic" name="topic" className="field" defaultValue="">
+                      <option value="" disabled>Select one…</option>
+                      {CONTACT_TOPICS.map((t) => <option key={t}>{t}</option>)}
+                    </select>
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="field-label" htmlFor="message">How can we help?</label>
+                    <textarea id="message" name="message" className="field min-h-[130px] resize-y" />
+                  </div>
+                </div>
+              </Form>
+            </div>
           </div>
 
           <div>

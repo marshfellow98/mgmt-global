@@ -228,3 +228,57 @@ effects work because most of the page is still.
 
 Everything above is off under `prefers-reduced-motion`, and the cursor
 effects are skipped entirely on touch devices.
+
+## /confidential
+
+A separate, deliberately different door for candidates.
+
+**The reasoning.** The people worth reaching are the ones least able to raise
+their hand. A producer with a real book has genuine exposure if word travels
+before they're ready — standing, book, an unwanted non-compete conversation.
+So they don't fill in contact forms. The main contact form asks for their
+employer before it has earned any trust.
+
+**What makes it work** is the copy more than the mechanics. It names the fear
+directly, and it asks for *less* than the contact form, not more: personal
+email, roughly what they do, what would make a move worth it, when it's safe
+to reach them. No employer. No work phone. Name optional.
+
+It's also visually quieter — no video, no glass, narrow column, minimal
+motion. The restraint is part of the message. Don't "improve" it by adding
+the homepage treatment.
+
+**This only works if the promises are real.** The page commits to never
+contacting someone at work and never putting a name in front of a client
+without permission. If the firm doesn't operate that way, this is worse than
+not having it. Confirm with Shane before launch.
+
+Linked from: the hero prompt, the footer, the careers page, and the contact
+page (as an exit for anyone hesitating over the employer field).
+
+## Forms
+
+Both relay straight to an inbox via Resend. Nothing is stored — no database,
+no third-party dashboard, no log of the message body. That's deliberate:
+`/confidential` promises discretion, and the promise is hollow if submissions
+sit in a SaaS admin panel someone else can read. It's also why Formspree and
+similar were not used.
+
+`/api/contact` → `CONTACT_TO` (shared inbox is fine)
+`/api/confidential` → `CONFIDENTIAL_TO`, a **personal** address of Shane's
+
+The confidential route logs nothing at all, not even on failure, and its
+subject line carries no identifying detail so a phone lock-screen
+notification gives nothing away.
+
+**Spam handling is a honeypot plus a timestamp, not a CAPTCHA.** Asking a
+cautious executive to prove they're human on a confidential enquiry form is
+exactly the wrong signal. The honeypot is a hidden field bots fill in; the
+timestamp rejects anything submitted in under three seconds. Spam gets a
+silent success response — telling a bot it failed just invites a retry.
+
+Forms keep a real `action` and `method`, so they still work if JavaScript
+fails. The fetch submission is an enhancement on top.
+
+Env vars: see `.env.example`. All four are listed in `render.yaml` as
+`sync: false`, so set them in the Render dashboard.

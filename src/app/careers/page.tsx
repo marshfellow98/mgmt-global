@@ -61,6 +61,13 @@ export default async function Careers() {
             <p className="fade d4 mt-8">
               <Link href="/about" className="lnk">Learn more about us <span>&rarr;</span></Link>
             </p>
+            <p className="fade d4 mt-6 max-w-[46ch] text-[.88rem] text-muted">
+              Not looking at our own roles, but curious what else is out there?{' '}
+              <Link href="/confidential" className="text-gold underline-offset-4 hover:underline">
+                Start a confidential conversation
+              </Link>{' '}
+              instead — nothing goes anywhere without your say-so.
+            </p>
           </div>
         </Reveal>
       </section>
