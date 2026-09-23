@@ -30,7 +30,7 @@ export default function Home() {
           style={{
             background:
               'linear-gradient(105deg,rgba(5,7,10,.96) 0%,rgba(5,7,10,.82) 38%,rgba(5,7,10,.25) 78%),' +
-              'linear-gradient(to top,rgba(5,7,10,1) 2%,rgba(5,7,10,0) 48%)',
+              'linear-gradient(to top,rgba(5,7,10,.86) 0%,rgba(5,7,10,.30) 22%,rgba(5,7,10,0) 46%)',
           }}
         />
         <div
@@ -67,12 +67,10 @@ export default function Home() {
         </div>
       </Reveal>
 
-      <Marquee />
-
       {/* Lifted so it overlaps the hero. The glass has the video behind it to
           refract, which is the only place on this site where the effect has
           anything to work with. */}
-      <section className="relative z-10 -mt-[clamp(3rem,8vh,7rem)] mb-[clamp(2rem,6vw,4rem)]">
+      <section className="relative z-10 -mt-[clamp(4.5rem,13vh,10rem)] mb-[clamp(3rem,7vw,5rem)]">
         <div className="shell">
           <Reveal className="glass grid grid-cols-2 gap-x-8 gap-y-10 px-[clamp(1.5rem,4vw,3.5rem)] py-[clamp(2rem,4vw,3rem)] lg:grid-cols-4">
             {STATS.map((s, i) => (
@@ -88,6 +86,9 @@ export default function Home() {
           </Reveal>
         </div>
       </section>
+
+      <Marquee />
+
 
       <section className="bg-char py-[clamp(4rem,10vw,9rem)]">
         <Reveal className="shell grid items-center gap-10 lg:grid-cols-[.85fr_1.15fr] lg:gap-[4.5rem]">
