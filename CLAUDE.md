@@ -160,3 +160,25 @@ Newsletter signup in footer → Buttondown. Positioning: "Stay ahead of the insu
 - Recruiterflow API key
 - Professional headshots of Shane
 - Rewritten Individual Accountability copy
+
+---
+
+## Glass surfaces
+
+`.glass` in globals.css is the liquid-glass treatment: backdrop blur plus
+saturation, a top-lit gradient, a specular hairline along the top edge, and a
+faint gold bloom so it reads as part of this palette rather than a borrowed
+system component.
+
+**Use it only over imagery.** It sits on the hero stat panel because the video
+is behind it. Over a flat dark section it has nothing to refract and looks
+like grey plastic.
+
+**Never put it on something that moves.** backdrop-filter re-blurs the region
+behind the element on every frame. A blurred sticky nav was removed from this
+project earlier precisely because it made the whole page feel choppy. Glass on
+a fixed or stationary panel is cheap; glass on a scrolling or sticky element
+is not.
+
+Falls back to a solid panel where backdrop-filter is unsupported, and under
+`prefers-reduced-transparency`.

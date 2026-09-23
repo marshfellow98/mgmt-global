@@ -228,6 +228,81 @@ html.js .is-on .fade { opacity: 1; transform: none; }
 .tick { flex: 1; height: 2px; background: var(--rule); position: relative; overflow: hidden; }
 .tick i { position: absolute; inset: 0; background: var(--gold); transform: scaleX(0); transform-origin: left; transition: transform .2s linear; }
 
+
+/* ============================================================================
+   Glass
+
+   Translucent panels in the liquid-glass idiom. Three layers do the work: a
+   blur of whatever sits behind, a faint top-lit gradient so the surface has
+   direction, and a hairline highlight along the top edge standing in for a
+   specular catch.
+
+   Used sparingly and deliberately. backdrop-filter is genuinely expensive —
+   the browser re-blurs the region behind the element every frame it moves —
+   and this site scrolls smoothly precisely because a blurred sticky nav was
+   removed earlier. So: glass over the hero video, where there is real imagery
+   to refract and the panel does not move. Never on anything that scrolls or
+   repaints constantly.
+
+   Over a flat dark background glass has nothing to refract and reads as grey
+   plastic, which is why it is not used elsewhere here.
+   ============================================================================ */
+.glass {
+  position: relative;
+  background: linear-gradient(
+    160deg,
+    rgba(255,255,255,.11) 0%,
+    rgba(255,255,255,.05) 42%,
+    rgba(255,255,255,.025) 100%
+  );
+  border: 1px solid rgba(255,255,255,.11);
+  box-shadow:
+    0 18px 50px -12px rgba(0,0,0,.55),
+    inset 0 1px 0 rgba(255,255,255,.14);
+  -webkit-backdrop-filter: blur(22px) saturate(150%);
+  backdrop-filter: blur(22px) saturate(150%);
+}
+
+/* The specular edge — brighter through the middle, fading at the corners,
+   the way light actually catches a curved surface. */
+.glass::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(to right,
+    transparent 0%,
+    rgba(255,255,255,.34) 28%,
+    rgba(255,255,255,.5) 50%,
+    rgba(255,255,255,.34) 72%,
+    transparent 100%);
+}
+
+/* A faint warm bloom pulled from the brand gold, so the glass belongs to this
+   palette rather than looking like a borrowed system component. */
+.glass::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(120% 90% at 18% 0%,
+    rgba(225,161,63,.10) 0%, rgba(225,161,63,0) 58%);
+}
+
+/* Browsers that cannot blur get a solid panel rather than a transparent one. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass { background: rgba(14,19,26,.92); }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .glass {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: rgba(14,19,26,.94);
+  }
+}
+
 /* ============================================================
    Marquee
    ============================================================ */

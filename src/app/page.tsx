@@ -15,7 +15,7 @@ const HERO_POSTER = 'https://zktech.dz/MGMT/wp-content/uploads/2026/07/Hero-Home
 export default function Home() {
   return (
     <>
-      <Reveal as="header" immediate className="relative flex min-h-[100svh] items-end overflow-hidden">
+      <Reveal as="header" immediate className="relative flex min-h-[100svh] items-end overflow-hidden pb-[clamp(5rem,12vh,9rem)]">
         <div className="hero-media absolute inset-0 bg-[#0A0F16] motion-reduce:hidden">
           <video
             autoPlay muted loop playsInline poster={HERO_POSTER}
@@ -37,7 +37,7 @@ export default function Home() {
           className="relative mx-auto w-full max-w-shell px-[var(--pad)]"
           style={{
             paddingTop: 'calc(var(--navh) + clamp(1.5rem,4vh,3rem))',
-            paddingBottom: 'clamp(3rem,9vh,6rem)',
+            paddingBottom: 'clamp(2rem,5vh,3.5rem)',
           }}
         >
           <div className="fade mb-8 flex items-center gap-3 text-[.66rem] font-semibold uppercase tracking-[.24em] text-gold">
@@ -69,18 +69,23 @@ export default function Home() {
 
       <Marquee />
 
-      <section className="glow py-[clamp(4rem,10vw,9rem)]">
-        <div className="shell grid grid-cols-2 gap-x-8 gap-y-12 lg:grid-cols-4">
-          {STATS.map((s, i) => (
-            <Reveal key={s.label}>
-              <div className={`fade d${i} text-[clamp(2.6rem,6vw,4.6rem)] font-semibold leading-[.9] tracking-[-.03em] font-display`}>
-                {s.n}<span className="text-gold">{s.unit}</span>
+      {/* Lifted so it overlaps the hero. The glass has the video behind it to
+          refract, which is the only place on this site where the effect has
+          anything to work with. */}
+      <section className="relative z-10 -mt-[clamp(3rem,8vh,7rem)] mb-[clamp(2rem,6vw,4rem)]">
+        <div className="shell">
+          <Reveal className="glass grid grid-cols-2 gap-x-8 gap-y-10 px-[clamp(1.5rem,4vw,3.5rem)] py-[clamp(2rem,4vw,3rem)] lg:grid-cols-4">
+            {STATS.map((s, i) => (
+              <div key={s.label}>
+                <div className={`fade d${i} relative font-display text-[clamp(2.1rem,4.6vw,3.4rem)] font-semibold leading-[.9] tracking-[-.03em]`}>
+                  {s.n}<span className="text-gold">{s.unit}</span>
+                </div>
+                <div className={`fade d${i + 1} relative mt-3 max-w-[18ch] text-[.76rem] leading-snug text-muted`}>
+                  {s.label}
+                </div>
               </div>
-              <div className={`fade d${i + 1} mt-4 max-w-[18ch] text-[.78rem] leading-snug text-muted`}>
-                {s.label}
-              </div>
-            </Reveal>
-          ))}
+            ))}
+          </Reveal>
         </div>
       </section>
 
