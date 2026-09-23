@@ -1,5 +1,7 @@
 import Link from 'next/link';
 import Reveal from '@/components/Reveal';
+import Spotlight from '@/components/Spotlight';
+import Magnetic from '@/components/Magnetic';
 import Line from '@/components/Line';
 import Marquee from '@/components/Marquee';
 import StickyCards from '@/components/StickyCards';
@@ -55,9 +57,9 @@ export default function Home() {
             is too important to leave to chance.
           </p>
           <div className="fade d3 flex flex-wrap items-center gap-x-10 gap-y-5">
-            <Link href="/contact" className="btn">
+            <Magnetic href="/contact" className="btn">
               Book a Consultation <span className="arw">&rarr;</span>
-            </Link>
+            </Magnetic>
             <p className="m-0 max-w-[19ch] text-[.8rem] leading-snug text-muted">
               Exploring your next move?
               <br />
@@ -72,7 +74,8 @@ export default function Home() {
           anything to work with. */}
       <section className="relative z-10 -mt-[clamp(4.5rem,13vh,10rem)] mb-[clamp(3rem,7vw,5rem)]">
         <div className="shell">
-          <Reveal className="glass grid grid-cols-2 gap-x-8 gap-y-10 px-[clamp(1.5rem,4vw,3.5rem)] py-[clamp(2rem,4vw,3rem)] lg:grid-cols-4">
+          <Spotlight className="glass" size={560} strength={0.11}>
+            <Reveal className="grid grid-cols-2 gap-x-8 gap-y-10 px-[clamp(1.5rem,4vw,3.5rem)] py-[clamp(2rem,4vw,3rem)] lg:grid-cols-4">
             {STATS.map((s, i) => (
               <div key={s.label}>
                 <div className={`fade d${i} relative font-display text-[clamp(2.1rem,4.6vw,3.4rem)] font-semibold leading-[.9] tracking-[-.03em]`}>
@@ -83,7 +86,8 @@ export default function Home() {
                 </div>
               </div>
             ))}
-          </Reveal>
+            </Reveal>
+          </Spotlight>
         </div>
       </section>
 

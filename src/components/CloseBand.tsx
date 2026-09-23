@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Magnetic from './Magnetic';
 import Reveal from './Reveal';
 import Line from './Line';
 
@@ -13,9 +13,9 @@ export default function CloseBand() {
         <p className="fade d2 mx-auto mb-11 max-w-[44ch] text-muted">
           Thirty minutes, completely confidential, and you talk directly with our team.
         </p>
-        <Link href="/contact" className="btn fade d3">
+        <Magnetic href="/contact" className="btn fade d3">
           Book a Consultation <span className="arw">&rarr;</span>
-        </Link>
+        </Magnetic>
       </div>
     </Reveal>
   );

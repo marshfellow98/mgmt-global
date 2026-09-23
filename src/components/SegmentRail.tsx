@@ -1,3 +1,4 @@
+import Spotlight from './Spotlight';
 import { SEGMENTS } from '@/lib/content';
 
 export default function SegmentRail() {
@@ -5,11 +6,11 @@ export default function SegmentRail() {
     <>
       <div className="hrail">
         {SEGMENTS.map((s) => (
-          <div key={s.title} className="hcard">
+          <Spotlight key={s.title} className="hcard" size={320} strength={0.08}>
             <h4>{s.title}</h4>
             <p>{s.blurb}</p>
             <ul>{s.roles.map((r) => <li key={r}>{r}</li>)}</ul>
-          </div>
+          </Spotlight>
         ))}
       </div>
       <div className="shell">

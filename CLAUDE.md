@@ -182,3 +182,26 @@ is not.
 
 Falls back to a solid panel where backdrop-filter is unsupported, and under
 `prefers-reduced-transparency`.
+
+## Cursor reactivity
+
+Two components, both deliberately restrained.
+
+**`Spotlight`** — a soft gold wash that follows the cursor across a surface.
+Applied to the glass stat panel, the sticky service cards, and the
+practice-area cards. Position is written to CSS custom properties on each
+animation frame, never to React state; re-rendering on mousemove would be
+catastrophic. It renders its own light layer rather than using a
+pseudo-element, because `.glass` already uses both of its own.
+
+**`Magnetic`** — the element leans toward the cursor, then settles back.
+Applied only to the primary "Book a Consultation" calls to action. Travel is
+capped at 7px on purpose: large magnetism makes a button feel slippery and
+harder to click, which is the wrong trade for a conversion point.
+
+Both skip pointer-coarse devices entirely — there is no cursor on a phone, so
+the listeners would cost battery for nothing — and both respect
+`prefers-reduced-motion`.
+
+Don't extend these much further. The effect works because most of the page
+doesn't do it.

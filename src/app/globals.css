@@ -247,6 +247,43 @@ html.js .is-on .fade { opacity: 1; transform: none; }
    Over a flat dark background glass has nothing to refract and reads as grey
    plastic, which is why it is not used elsewhere here.
    ============================================================================ */
+/* ============================================================================
+   Spotlight
+
+   A soft gold wash that follows the cursor. --mx/--my are written by
+   Spotlight.tsx on each animation frame; --spot fades the whole thing in and
+   out on enter and leave, so there's no hard pop.
+
+   It uses a dedicated layer rather than a pseudo-element, because .glass
+   already spends both of its own on the specular edge and the warm bloom.
+
+   The layer is pointer-events: none and sits under the content, so it never
+   intercepts clicks or washes out text.
+   ============================================================================ */
+.spot { position: relative; isolation: isolate; }
+
+.spot > .spot-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: var(--spot, 0);
+  transition: opacity .45s ease;
+  background: radial-gradient(
+    var(--spot-size, 420px) circle at var(--mx, 50%) var(--my, 50%),
+    rgba(225, 161, 63, var(--spot-strength, .09)) 0%,
+    rgba(225, 161, 63, calc(var(--spot-strength, .09) * .35)) 32%,
+    rgba(225, 161, 63, 0) 68%
+  );
+}
+
+/* Content sits above the wash. */
+.spot > *:not(.spot-layer) { position: relative; z-index: 1; }
+
+@media (pointer: coarse) { .spot > .spot-layer { display: none; } }
+@media (prefers-reduced-motion: reduce) { .spot > .spot-layer { display: none; } }
+
+
 .glass {
   position: relative;
   background: linear-gradient(
@@ -324,6 +361,14 @@ html.js .is-on .fade { opacity: 1; transform: none; }
   padding: clamp(1.8rem, 4vw, 3.4rem); margin-bottom: 1.4rem;
   display: grid; gap: 1.6rem; grid-template-columns: 1fr;
 }
+/* Each card settles a little lower than the last, so they stack visibly as
+   you pass. Offsets clear the fixed nav. Lives here rather than as an inline
+   style so the markup stays clean. */
+.scard:nth-of-type(1) { top: calc(var(--navh) + 1.5rem); }
+.scard:nth-of-type(2) { top: calc(var(--navh) + 3rem); }
+.scard:nth-of-type(3) { top: calc(var(--navh) + 4.5rem); }
+.scard:nth-of-type(4) { top: calc(var(--navh) + 6rem); }
+
 @media (min-width: 880px) { .scard { grid-template-columns: .42fr 1fr; gap: 3.5rem; align-items: start; } }
 .scard .idx { font-family: var(--font-sans), sans-serif; font-size: .66rem; letter-spacing: .2em; color: var(--gold); font-weight: 600; }
 .scard h3 { font-size: clamp(1.5rem, 3.2vw, 2.3rem); margin: .7rem 0 0; }
