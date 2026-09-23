@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import Reveal from '@/components/Reveal';
 import Spotlight from '@/components/Spotlight';
 import Magnetic from '@/components/Magnetic';
@@ -49,13 +50,13 @@ export default function Home() {
             <span className="h-px w-11 bg-gold" />
             Future growth, today
           </div>
-          <h1 className="display-lg mb-8">
+          <h1 className="display-lg mb-6 sm:mb-8">
             <Line>Hire the insurance</Line>
             <Line>producers your</Line>
             <Line><em className="accent">competitors wish</em></Line>
             <Line><em className="accent">they had.</em></Line>
           </h1>
-          <p className="sub fade d2 mb-11">
+          <p className="sub fade d2 mb-8 sm:mb-11">
             For more than two decades, insurance organizations have come to MGMTGlobal when a hire
             is too important to leave to chance.
           </p>
@@ -80,7 +81,7 @@ export default function Home() {
       <section className="relative z-10 -mt-[clamp(4.5rem,13vh,10rem)] mb-[clamp(3rem,7vw,5rem)]">
         <div className="shell">
           <Spotlight className="glass" size={560} strength={0.11}>
-            <Reveal className="grid grid-cols-2 gap-x-8 gap-y-10 px-[clamp(1.5rem,4vw,3.5rem)] py-[clamp(2rem,4vw,3rem)] lg:grid-cols-4">
+            <Reveal className="grid grid-cols-2 gap-x-6 gap-y-8 px-[clamp(1.25rem,4vw,3.5rem)] py-[clamp(1.75rem,4vw,3rem)] sm:gap-x-8 sm:gap-y-10 lg:grid-cols-4">
             {STATS.map((s, i) => (
               <div key={s.label}>
                 <div className={`fade d${i} relative font-display text-[clamp(2.1rem,4.6vw,3.4rem)] font-semibold leading-[.9] tracking-[-.03em]`}>
@@ -101,7 +102,16 @@ export default function Home() {
 
       <section className="bg-char py-[clamp(4rem,10vw,9rem)]">
         <Reveal className="shell grid items-center gap-10 lg:grid-cols-[.85fr_1.15fr] lg:gap-[4.5rem]">
-          <div className="ph fade aspect-[4/5]">Shane Graham — portrait</div>
+          <div className="fade relative aspect-[4/5] overflow-hidden">
+            <Image
+              src="/images/shane-graham.jpg"
+              alt="Shane Graham, Founder, President & CEO of MGMTGlobal"
+              fill
+              sizes="(min-width: 900px) 42vw, 90vw"
+              className="object-cover"
+              priority={false}
+            />
+          </div>
           <div>
             <div className="kick fade">Who we are</div>
             <h2 className="display">
