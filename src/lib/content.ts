@@ -17,10 +17,10 @@ export const CONTACT = {
 };
 
 export const STATS = [
-  { n: '1,200', unit: '+', label: 'Producers hired for key clients' },
-  { n: '50', unit: '+', label: 'Years combined search experience' },
-  { n: '25', unit: 'yr', label: 'Proprietary talent database' },
-  { n: '100', unit: '%', label: 'Insurance, no other industries' },
+  { n: 1200, unit: '+',  label: 'Producers hired for key clients' },
+  { n: 50,   unit: '+',  label: 'Years combined search experience' },
+  { n: 25,   unit: 'yr', label: 'Proprietary talent database' },
+  { n: 100,  unit: '%',  label: 'Insurance, no other industries' },
 ];
 
 /* BB&T removed — merged into Truist in 2019. Confirm display permission

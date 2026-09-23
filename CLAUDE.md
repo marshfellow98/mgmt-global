@@ -205,3 +205,26 @@ the listeners would cost battery for nothing — and both respect
 
 Don't extend these much further. The effect works because most of the page
 doesn't do it.
+
+## Motion inventory
+
+Everything that moves, and why. Before adding more, check the list — the
+effects work because most of the page is still.
+
+| Effect | Where | Why |
+|---|---|---|
+| Masked line reveal | All display headings | The core reveal; content visible by default, animation only under `html.js` |
+| Smooth scroll (Lenis) | Whole site | Native wheel scroll jumps ~100px; this interpolates |
+| Pinned path sections | `/about`, `/services/retained-search` | The scroll contract; phase-two 3D swaps in here |
+| Glass + spotlight | Hero stat panel | Glass needs imagery behind it; spotlight gives it a moving light source |
+| Spotlight | Service cards, practice cards | Light follows cursor; pointer-fine only |
+| Magnetic | Primary CTAs only | 7px travel; more makes buttons feel slippery |
+| Counters | Hero stat panel | The numbers *are* the argument |
+| Hero parallax | Homepage | Slight drift and scale; depth without announcing itself |
+| Page transition | Every route | Keeps multi-page navigation from feeling like a hard cut |
+| Arc divider | Homepage | Echoes the logo sweep — the one ornament drawn from his own identity |
+| Marquee | Client names | Pauses on hover |
+| Hover rows | Job listings | Indent plus gold edge |
+
+Everything above is off under `prefers-reduced-motion`, and the cursor
+effects are skipped entirely on touch devices.

@@ -2,6 +2,9 @@ import Link from 'next/link';
 import Reveal from '@/components/Reveal';
 import Spotlight from '@/components/Spotlight';
 import Magnetic from '@/components/Magnetic';
+import Counter from '@/components/Counter';
+import HeroParallax from '@/components/HeroParallax';
+import ArcDivider from '@/components/ArcDivider';
 import Line from '@/components/Line';
 import Marquee from '@/components/Marquee';
 import StickyCards from '@/components/StickyCards';
@@ -18,7 +21,7 @@ export default function Home() {
   return (
     <>
       <Reveal as="header" immediate className="relative flex min-h-[100svh] items-end overflow-hidden pb-[clamp(5rem,12vh,9rem)]">
-        <div className="hero-media absolute inset-0 bg-[#0A0F16] motion-reduce:hidden">
+        <HeroParallax>
           <video
             autoPlay muted loop playsInline poster={HERO_POSTER}
             className="h-full w-full object-cover"
@@ -26,7 +29,7 @@ export default function Home() {
           >
             <source src={HERO_VIDEO} type="video/mp4" />
           </video>
-        </div>
+        </HeroParallax>
         <div
           className="absolute inset-0"
           style={{
@@ -79,7 +82,7 @@ export default function Home() {
             {STATS.map((s, i) => (
               <div key={s.label}>
                 <div className={`fade d${i} relative font-display text-[clamp(2.1rem,4.6vw,3.4rem)] font-semibold leading-[.9] tracking-[-.03em]`}>
-                  {s.n}<span className="text-gold">{s.unit}</span>
+                  <Counter value={s.n} /><span className="text-gold">{s.unit}</span>
                 </div>
                 <div className={`fade d${i + 1} relative mt-3 max-w-[18ch] text-[.76rem] leading-snug text-muted`}>
                   {s.label}
@@ -158,7 +161,9 @@ export default function Home() {
         </Reveal>
       </section>
 
-      <section className="py-[clamp(4rem,10vw,9rem)]">
+      <ArcDivider />
+
+      <section className="py-[clamp(4rem,10vw,9rem)] pt-0">
         <Reveal className="shell mb-11">
           <div className="kick fade">Where we work</div>
           <h2 className="display">
