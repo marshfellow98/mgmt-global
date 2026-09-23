@@ -26,8 +26,18 @@ export async function sendMail({
   replyTo?: string;
 }): Promise<MailResult> {
   const key = process.env.RESEND_API_KEY;
-  if (!key) return { ok: false, error: 'Email is not configured yet.' };
-  if (!to) return { ok: false, error: 'No destination address configured.' };
+
+  /* Name the missing piece rather than saying "not configured". The generic
+     message sends you hunting; this points straight at the variable. */
+  if (!key) {
+    return { ok: false, error: 'Server is missing RESEND_API_KEY. Check the Render environment.' };
+  }
+  if (!to) {
+    return { ok: false, error: 'Server is missing a destination address (CONTACT_TO / CONFIDENTIAL_TO).' };
+  }
+  if (!/^re_/.test(key)) {
+    return { ok: false, error: 'RESEND_API_KEY does not look like a Resend key — check for stray quotes or spaces.' };
+  }
 
   try {
     const resend = new Resend(key);
