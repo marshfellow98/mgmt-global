@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import Reveal from '@/components/Reveal';
 import Line from '@/components/Line';
 import CloseBand from '@/components/CloseBand';
+import ProcessLedger from '@/components/ProcessLedger';
+import { CONTINGENT_LEDGER } from '@/lib/content';
 import ServiceShell from '../ServiceShell';
 
 export const metadata: Metadata = {
@@ -42,7 +44,9 @@ export default function ContingentSubmittal() {
               <a className="lnk" href="#">Download the overview (PDF) <span>&rarr;</span></a>
             </p>
           </div>
-          <div className="ph fade d1 aspect-[3/4]">Contingent Submittal — image</div>
+          <div className="fade d1 aspect-[3/4]">
+            <ProcessLedger {...CONTINGENT_LEDGER} />
+          </div>
         </Reveal>
       </section>
 

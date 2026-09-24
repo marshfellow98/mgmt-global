@@ -223,6 +223,8 @@ effects work because most of the page is still.
 | Hero parallax | Homepage | Slight drift and scale; depth without announcing itself |
 | Page transition | Every route | Keeps multi-page navigation from feeling like a hard cut |
 | Arc divider | Homepage | Echoes the logo sweep — the one ornament drawn from his own identity |
+| Process ledger | Three service pages | Scroll-linked, not pinned; fills the old stock-photo slot |
+| Globe (3D) | `/services/retained-search` | Phase two; see below |
 | Marquee | Client names | Pauses on hover |
 | Hover rows | Job listings | Indent plus gold edge |
 
@@ -282,3 +284,50 @@ fails. The fetch submission is an enhancement on top.
 
 Env vars: see `.env.example`. All four are listed in `render.yaml` as
 `sync: false`, so set them in the Render dashboard.
+
+## Phase two: the globe
+
+`Globe.tsx` + `GlobeScene.tsx` are the 3D interior for `PinnedSection`. Live
+on `/services/retained-search`; `/about` still runs `PathDiagram`.
+
+**Everything is procedural.** No model file, no texture, nothing to license or
+host. The globe is a sphere geometry whose wireframe segments double as
+latitude and longitude lines. Flat materials only — no lights, no shadows —
+so it looks like a drawing, matches the rest of the site, and costs almost
+nothing per frame.
+
+**The contract held.** Swapping `<PathDiagram />` for `<Globe />` was one
+import and one line on the page. Nothing else changed. Swapping back is the
+same one line.
+
+**It's client-only and code-split.** `next/dynamic` with `ssr: false` keeps
+Three.js (~900 KB) out of every page except the one that uses it. Under
+`prefers-reduced-motion` PinnedSection renders its flat layout and the globe
+never mounts.
+
+**Progress crosses into the Canvas via a ref, not context.** R3F runs its own
+React tree; context from outside doesn't reach it. `Globe.tsx` subscribes with
+`useScrollProgress` and writes to a ref the scene reads in `useFrame`.
+
+**The scene smooths itself.** Scroll progress arrives at whatever cadence
+scrolling produces; `useFrame` lerps rotation and arc reveal toward it at
+60fps, so motion stays continuous regardless of input rate.
+
+Waypoints live in `content.ts` as `PROCESS_GLOBE` — lat/lon per stop. Change
+those to move the stops; keep longitudes ~70° apart so the globe visibly
+turns between them.
+
+## Process ledger
+
+`ProcessLedger.tsx` fills the 3:4 slot on each service page where a stock
+photo used to sit. A gold rail fills as the panel passes through the viewport
+and each step lights as the rail reaches it. One large word sits behind at 6%
+opacity — the only flourish.
+
+**Scroll-linked, deliberately not pinned.** Retained-search already has a
+pinned section (the globe). Two on one page fight each other. The ledger moves
+as you pass it and is then done, so the page keeps one moment of arrival.
+
+Content lives in `content.ts` as `RETAINED_LEDGER`, `CONTINGENT_LEDGER`,
+`MA_LEDGER`. Every line is derived from copy already on the site — nothing
+invented about his process. Change the wording there, not in the component.

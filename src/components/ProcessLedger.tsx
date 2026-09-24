@@ -116,11 +116,12 @@ export default function ProcessLedger({
       {/* The one flourish: a large word, barely there. */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -bottom-[.18em] -right-[.06em] select-none font-display font-semibold leading-none"
+        className="pointer-events-none absolute inset-x-0 top-1/2 select-none text-center font-display font-semibold leading-none"
         style={{
-          fontSize: 'clamp(7rem, 22vw, 15rem)',
-          color: 'rgba(225,161,63,.06)',
+          fontSize: 'clamp(5rem, 16vw, 11rem)',
+          color: 'rgba(225,161,63,.05)',
           letterSpacing: '-0.04em',
+          transform: 'translateY(-46%)',
         }}
       >
         {watermark}
@@ -129,7 +130,9 @@ export default function ProcessLedger({
       <div className="relative flex h-full flex-col p-[clamp(1.5rem,3.5vw,2.6rem)]">
         <div className="kick mb-0">{kick}</div>
 
-        <ol className="relative m-0 mt-auto flex list-none flex-col gap-[clamp(1.1rem,2.4vw,1.8rem)] p-0 pl-8">
+        {/* Centred rather than bottom-pinned — bottom-pinning left a void at
+            the top of a tall panel. */}
+        <ol className="relative m-0 flex flex-1 list-none flex-col justify-center gap-[clamp(1.4rem,3vw,2.4rem)] p-0 pl-8">
           {/* Rail: a track, and a gold fill that scales with progress. */}
           <div aria-hidden="true" className="absolute bottom-2 left-0 top-2 w-px bg-rule" />
           <div
