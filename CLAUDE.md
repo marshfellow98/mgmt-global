@@ -331,3 +331,29 @@ as you pass it and is then done, so the page keeps one moment of arrival.
 Content lives in `content.ts` as `RETAINED_LEDGER`, `CONTINGENT_LEDGER`,
 `MA_LEDGER`. Every line is derived from copy already on the site — nothing
 invented about his process. Change the wording there, not in the component.
+
+## /overview — the pitch deck
+
+A deck that lives at a URL rather than in a file. Eight slides, sent as a
+link, on the firm's own domain.
+
+**Built as spatial movement, not slides.** The whole deck is one wide track
+and advancing translates it sideways, so each step reads as travelling
+through a space rather than cutting between pages — the Prezi quality without
+the Prezi subscription. Transform-only on a single element, so it composites
+on the GPU and stays smooth on a phone.
+
+Navigation: arrow keys, space, swipe, click the left/right thirds, number
+keys to jump, or the dots. Slide index lives in the URL hash, so a client can
+be sent to `/overview#4` and the back button behaves.
+
+**Content lives in `src/lib/deck.ts`**, drawn from the site's own copy so the
+two can't drift apart. One idea per slide on purpose — this is meant to be
+read in ninety seconds by someone deciding whether to take a call.
+
+`robots: noindex` — a sales deck shouldn't compete with the real service
+pages in search results. It's deliberately absent from the sitemap for the
+same reason (verify.mjs knows about the exception).
+
+The route has its own layout that hides the site nav and footer. Someone
+opening the link should see the pitch and nothing else.

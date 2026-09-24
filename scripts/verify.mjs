@@ -111,7 +111,10 @@ const ok  = (m) => console.log('  ok   ' + m);
     e.isDirectory() ? walk(join(dir, e.name)) : [join(dir, e.name)]);
   const routes = walk('src/app')
     .filter((f) => f.endsWith('page.tsx'))
-    .map((f) => f.replace('src/app', '').replace('/page.tsx', ''));
+    .map((f) => f.replace('src/app', '').replace('/page.tsx', ''))
+    // /overview is the sales deck: noindex by design, so it's deliberately
+    // absent from the sitemap.
+    .filter((r) => r !== '/overview');
   const sm = readFileSync('src/app/sitemap.ts', 'utf8');
   const missing = routes.filter((r) => !sm.includes(`page('${r}'`));
   if (missing.length) bad(`sitemap missing: ${missing.join(', ')}`);
