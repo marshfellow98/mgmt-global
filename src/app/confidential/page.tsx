@@ -26,10 +26,16 @@ import { CONTACT } from '@/lib/content';
    ============================================================================ */
 
 export const metadata: Metadata = {
-  title: 'A confidential conversation',
+  title: 'A Confidential Conversation | Explore Quietly',
   description:
-    'A discreet way for insurance professionals to explore options. Nothing is shared without your say-so, and we never contact you at work.',
-  robots: { index: true, follow: true },
+    'A discreet way for insurance professionals to explore options. Your name goes nowhere without your say-so, and we never contact you at work.',
+  alternates: { canonical: '/confidential' },
+  openGraph: {
+    title: 'A Confidential Conversation | Explore Quietly',
+    description: 'A discreet way for insurance professionals to explore options. Your name goes nowhere without your say-so, and we never contact you at work.',
+    url: '/confidential',
+    type: 'website',
+  },
 };
 
 const COMMITMENTS = [

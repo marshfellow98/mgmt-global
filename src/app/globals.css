@@ -47,9 +47,16 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Fine grain over everything. Keep the z-index below any 3D canvas
-   added later — compositing a full-screen overlay above WebGL costs
-   a repaint every frame. */
+/* Fine grain over everything.
+
+   Desktop only. A fixed, full-screen, composited layer is nearly free on a
+   laptop GPU and one of the most expensive things you can ask a phone to do
+   on every scroll frame — it was a major cause of mobile jank. The texture
+   is subtle enough that dropping it on small screens costs nothing visually.
+   Also skipped for reduced motion. */
+@media (max-width: 1023px) { body::after { display: none; } }
+@media (prefers-reduced-motion: reduce) { body::after { display: none; } }
+
 body::after {
   content: "";
   position: fixed;
@@ -361,6 +368,17 @@ html.js .is-on .fade { opacity: 1; transform: none; }
   .glass { background: rgba(14,19,26,.92); }
 }
 
+/* Phones: solid panel instead of a live blur. backdrop-filter forces the
+   browser to re-blur whatever sits behind the element on every frame, which
+   a phone GPU feels immediately. Visually near-identical over dark video. */
+@media (max-width: 1023px) {
+  .glass {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: rgba(14, 19, 26, 0.88);
+  }
+}
+
 @media (prefers-reduced-transparency: reduce) {
   .glass {
     -webkit-backdrop-filter: none;
@@ -482,7 +500,10 @@ html.js .is-on .fade { opacity: 1; transform: none; }
 .quote .name { font-weight: 600; font-size: .92rem; }
 .quote .role { font-size: .79rem; color: var(--muted); margin-top: .2rem; line-height: 1.35; }
 
-.hero-media { transform: translateZ(0); will-change: transform; }
+/* will-change keeps a compositor layer alive permanently, which costs
+   memory on a phone for a parallax that's disabled there anyway. */
+.hero-media { transform: translateZ(0); }
+@media (min-width: 1024px) { .hero-media { will-change: transform; } }
 
 .ph {
   background: repeating-linear-gradient(45deg, #0D131B 0 10px, #101823 10px 20px);

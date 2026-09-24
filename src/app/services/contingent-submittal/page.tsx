@@ -5,10 +5,19 @@ import CloseBand from '@/components/CloseBand';
 import ProcessLedger from '@/components/ProcessLedger';
 import { CONTINGENT_LEDGER } from '@/lib/content';
 import ServiceShell from '../ServiceShell';
+import { JsonLd, serviceSchema, breadcrumbSchema } from '@/lib/schema';
 
 export const metadata: Metadata = {
-  title: 'Contingent Submittal',
-  description: 'Flexible, success-based recruitment for ongoing insurance hiring needs.',
+  title: 'Contingent Insurance Recruitment | Pay on Placement',
+  description:
+    'Success-based insurance recruitment for producers, underwriters, account managers and claims professionals. No upfront commitment — you pay only on placement.',
+  alternates: { canonical: '/services/contingent-submittal' },
+  openGraph: {
+    title: 'Contingent Insurance Recruitment | Pay on Placement',
+    description: 'Success-based insurance recruitment for producers, underwriters, account managers and claims professionals. No upfront commitment — you pay only on placement.',
+    url: '/services/contingent-submittal',
+    type: 'website',
+  },
 };
 
 const IDEAL = ['Producers', 'Account managers', 'Underwriters', 'Claims professionals',
@@ -18,6 +27,21 @@ const WHY = ['No upfront commitment', 'Faster candidate delivery', 'Access to es
 
 export default function ContingentSubmittal() {
   return (
+    <>
+      <JsonLd
+        data={[
+          serviceSchema({
+            name: 'Contingent Submittal',
+            description: 'Success-based insurance recruitment. You pay only on a successful placement.',
+            path: '/services/contingent-submittal',
+          }),
+          breadcrumbSchema([
+            { name: 'Home', path: '/' },
+            { name: 'Services', path: '/services' },
+            { name: 'Contingent Submittal', path: '/services/contingent-submittal' },
+          ]),
+        ]}
+      />
     <ServiceShell
       kick="Contingent recruitment"
       heading={<><Line>Flexible recruitment</Line><Line><>for <em className="accent">ongoing hiring needs.</em></></Line></>}
@@ -67,5 +91,6 @@ export default function ContingentSubmittal() {
 
       <CloseBand />
     </ServiceShell>
+    </>
   );
 }

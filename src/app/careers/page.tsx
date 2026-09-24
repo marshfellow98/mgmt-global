@@ -7,8 +7,16 @@ import JobBoard from './JobBoard';
 import { getOpenJobs, locationsOf } from '@/lib/recruiterflow';
 
 export const metadata: Metadata = {
-  title: 'Careers',
-  description: 'Open roles placed by MGMTGlobal, and opportunities to join the firm.',
+  title: 'Insurance Jobs & Careers | Open Roles at MGMTGlobal',
+  description:
+    'Current open insurance roles placed by MGMTGlobal, and opportunities to join the firm. Producer, underwriting and leadership positions across the US.',
+  alternates: { canonical: '/careers' },
+  openGraph: {
+    title: 'Insurance Jobs & Careers | Open Roles at MGMTGlobal',
+    description: 'Current open insurance roles placed by MGMTGlobal, and opportunities to join the firm. Producer, underwriting and leadership positions across the US.',
+    url: '/careers',
+    type: 'website',
+  },
 };
 
 /* Revalidated on the same window as the API cache. */

@@ -5,10 +5,19 @@ import CloseBand from '@/components/CloseBand';
 import ProcessLedger from '@/components/ProcessLedger';
 import { MA_LEDGER } from '@/lib/content';
 import ServiceShell from '../ServiceShell';
+import { JsonLd, serviceSchema, breadcrumbSchema } from '@/lib/schema';
 
 export const metadata: Metadata = {
-  title: 'M&A Consulting',
-  description: 'Talent consulting for mergers, acquisitions, lift-outs, and restructuring in insurance.',
+  title: 'Insurance M&A Talent Consulting | Lift-outs & Acquisitions',
+  description:
+    'Leadership assessment, talent retention and team recruitment through insurance mergers, acquisitions, lift-outs, fold-ins and roll-ins.',
+  alternates: { canonical: '/services/ma-consulting' },
+  openGraph: {
+    title: 'Insurance M&A Talent Consulting | Lift-outs & Acquisitions',
+    description: 'Leadership assessment, talent retention and team recruitment through insurance mergers, acquisitions, lift-outs, fold-ins and roll-ins.',
+    url: '/services/ma-consulting',
+    type: 'website',
+  },
 };
 
 const MODES = [
@@ -20,6 +29,21 @@ const MODES = [
 
 export default function MAConsulting() {
   return (
+    <>
+      <JsonLd
+        data={[
+          serviceSchema({
+            name: 'M&A Consulting',
+            description: 'Leadership assessment, talent retention and team recruitment through insurance mergers, acquisitions and lift-outs.',
+            path: '/services/ma-consulting',
+          }),
+          breadcrumbSchema([
+            { name: 'Home', path: '/' },
+            { name: 'Services', path: '/services' },
+            { name: 'M&A Consulting', path: '/services/ma-consulting' },
+          ]),
+        ]}
+      />
     <ServiceShell
       kick="M&amp;A Consulting"
       heading={<><Line>Strategic consulting</Line><Line><>through <em className="accent">every stage of growth.</em></></Line></>}
@@ -72,5 +96,6 @@ export default function MAConsulting() {
 
       <CloseBand />
     </ServiceShell>
+    </>
   );
 }

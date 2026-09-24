@@ -25,16 +25,19 @@ const ok  = (m) => console.log('  ok   ' + m);
 
 // ---------- 2. Every page's metadata matches its folder ----------
 {
+  /* Match a distinctive phrase rather than the exact title: page titles get
+     rewritten for SEO, but a file landing in the wrong folder still gets
+     caught, which is the failure this is here to prevent. */
   const expect = {
-    'retained-search': 'Retained Search',
-    'contingent-submittal': 'Contingent Submittal',
-    'ma-consulting': 'M&A Consulting',
+    'retained-search': /Retained (Executive )?Search/i,
+    'contingent-submittal': /Contingent/i,
+    'ma-consulting': /M&A/i,
   };
-  for (const [dir, title] of Object.entries(expect)) {
+  for (const [dir, pattern] of Object.entries(expect)) {
     const p = `src/app/services/${dir}/page.tsx`;
     const s = readFileSync(p, 'utf8');
     const found = s.match(/title: '([^']+)'/)?.[1];
-    if (found !== title) bad(`${dir}/page.tsx has title "${found}", expected "${title}" — wrong file in folder?`);
+    if (!found || !pattern.test(found)) bad(`${dir}/page.tsx title "${found}" doesn't match ${pattern} — wrong file in folder?`);
     else ok(`${dir} → "${found}"`);
   }
 }
@@ -67,6 +70,52 @@ const ok  = (m) => console.log('  ok   ' + m);
       bad(`${f}: PinnedSection with no interior component`);
   }
   ok('pinned sections have interiors');
+}
+
+// ---------- 5. Every page has a canonical and a unique title ----------
+{
+  const walk = (dir) => readdirSync(dir, { withFileTypes: true }).flatMap((e) =>
+    e.isDirectory() ? walk(join(dir, e.name)) : [join(dir, e.name)]);
+  const pages = walk('src/app').filter((f) => f.endsWith('page.tsx'));
+  const titles = new Map();
+  for (const f of pages) {
+    const s = readFileSync(f, 'utf8');
+    if (!s.includes('export const metadata')) continue;   // homepage inherits layout
+    if (!s.includes('canonical:')) bad(`${f}: no canonical URL`);
+    const t = s.match(/title: '([^']+)'/)?.[1];
+    if (!t) { bad(`${f}: no title`); continue; }
+    if (titles.has(t)) bad(`duplicate title "${t}" in ${f} and ${titles.get(t)}`);
+    titles.set(t, f);
+  }
+  ok(`${titles.size} pages with unique titles and canonicals`);
+}
+
+// ---------- 6. Expensive effects are gated for mobile ----------
+{
+  const css = readFileSync('src/app/globals.css', 'utf8');
+  if (!/max-width: 1023px\) \{ body::after/.test(css)) bad('grain not disabled on mobile');
+  else ok('grain disabled on mobile');
+
+  const globe = readFileSync('src/components/Globe.tsx', 'utf8');
+  if (!globe.includes('min-width: 1024px')) bad('WebGL globe not gated to desktop');
+  else ok('WebGL globe gated to desktop');
+
+  const home = readFileSync('src/app/page.tsx', 'utf8');
+  if (!home.includes('lg:hidden')) bad('hero video not gated to desktop');
+  else ok('hero video gated to desktop');
+}
+
+// ---------- 7. Sitemap covers every route ----------
+{
+  const walk = (dir) => readdirSync(dir, { withFileTypes: true }).flatMap((e) =>
+    e.isDirectory() ? walk(join(dir, e.name)) : [join(dir, e.name)]);
+  const routes = walk('src/app')
+    .filter((f) => f.endsWith('page.tsx'))
+    .map((f) => f.replace('src/app', '').replace('/page.tsx', ''));
+  const sm = readFileSync('src/app/sitemap.ts', 'utf8');
+  const missing = routes.filter((r) => !sm.includes(`page('${r}'`));
+  if (missing.length) bad(`sitemap missing: ${missing.join(', ')}`);
+  else ok(`sitemap covers all ${routes.length} routes`);
 }
 
 console.log(fail ? `\n${fail} problem(s) found.` : '\nAll checks passed.');

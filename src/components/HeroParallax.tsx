@@ -22,6 +22,9 @@ export default function HeroParallax({ children }: { children: ReactNode }) {
     const el = ref.current;
     if (!el) return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    // The parallax moves the hero video, which isn't rendered below 1024px.
+    // No point paying for a scroll listener there.
+    if (!window.matchMedia('(min-width: 1024px)').matches) return;
 
     let frame = 0;
 

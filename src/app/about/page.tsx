@@ -6,17 +6,34 @@ import PinnedSection from '@/components/PinnedSection';
 import PathDiagram from '@/components/PathDiagram';
 import SegmentRail from '@/components/SegmentRail';
 import CloseBand from '@/components/CloseBand';
+import { JsonLd, personSchema, breadcrumbSchema } from '@/lib/schema';
 import { ADVANTAGE_STEPS, ADVANTAGE_PATH, ADVANTAGE_WAYPOINTS, VALUES, QUOTES } from '@/lib/content';
 
 export const metadata: Metadata = {
-  title: 'About',
+  title: 'About MGMTGlobal | Insurance Executive Search Since 2000',
   description:
-    'MGMTGlobal is a talent and management consultancy for the insurance industry, founded by Shane Graham.',
+    'MGMTGlobal is a boutique retained search and M&A consultancy working only in insurance. Founded by Shane Graham, with a 25-year proprietary talent database.',
+  alternates: { canonical: '/about' },
+  openGraph: {
+    title: 'About MGMTGlobal | Insurance Executive Search Since 2000',
+    description: 'MGMTGlobal is a boutique retained search and M&A consultancy working only in insurance. Founded by Shane Graham, with a 25-year proprietary talent database.',
+    url: '/about',
+    type: 'website',
+  },
 };
 
 export default function About() {
   return (
     <>
+      <JsonLd
+        data={[
+          personSchema,
+          breadcrumbSchema([
+            { name: 'Home', path: '/' },
+            { name: 'About', path: '/about' },
+          ]),
+        ]}
+      />
       <Reveal as="header" className="glow border-b border-rule" >
         <div
           className="shell"
@@ -51,7 +68,7 @@ export default function About() {
           </div>
           <div>
             <div className="kick fade">The principal</div>
-            <h2 className="display mb-2"><Line>Shane Graham</Line></h2>
+            <h2 id="shane-graham" className="display mb-2"><Line>Shane Graham</Line></h2>
             <p className="fade d1 mb-6 text-[.72rem] font-semibold uppercase tracking-[.18em] text-gold">
               Founder, President &amp; CEO
             </p>
@@ -92,13 +109,7 @@ export default function About() {
             {VALUES.map((v, i) => (
               <div key={v.title} className={`topline fade d${i % 4}`}>
                 <h3>{v.title}</h3>
-                {v.pending ? (
-                  <p className="italic text-[#5D6874]">
-                    Copy pending — duplicated Professional Growth on the old site.
-                  </p>
-                ) : (
-                  <p>{v.body}</p>
-                )}
+                <p>{v.body}</p>
               </div>
             ))}
           </div>

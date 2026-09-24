@@ -1,7 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useRef } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useScrollProgress } from './PinnedSection';
 import type { GlobeWaypoint } from './GlobeScene';
 
@@ -42,9 +42,31 @@ const GlobeScene = dynamic(() => import('./GlobeScene'), {
   ),
 });
 
-export default function Globe({ waypoints }: { waypoints: GlobeWaypoint[] }) {
+export default function Globe({
+  waypoints, fallback,
+}: { waypoints: GlobeWaypoint[]; fallback?: ReactNode }) {
   const progressRef = useRef(0);
+  const [use3D, setUse3D] = useState(false);
   useScrollProgress((p) => { progressRef.current = p; });
+
+  /* WebGL only where it's a fair ask.
+
+     A phone rendering a live 3D scene while also scrolling a long page is
+     the most expensive thing on this site, and on a mid-range Android it
+     shows. Below 1024px we render the SVG path instead — which is exactly
+     what PathDiagram was kept around for. Same contract, same progress,
+     a fraction of the cost. */
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 1024px)');
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const sync = () => setUse3D(mq.matches && !reduced.matches);
+    sync();
+    mq.addEventListener('change', sync);
+    reduced.addEventListener('change', sync);
+    return () => { mq.removeEventListener('change', sync); reduced.removeEventListener('change', sync); };
+  }, []);
+
+  if (!use3D) return <>{fallback ?? null}</>;
 
   return (
     <div className="relative h-full w-full">

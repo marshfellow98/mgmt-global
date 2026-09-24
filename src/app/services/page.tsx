@@ -5,9 +5,16 @@ import StickyCards from '@/components/StickyCards';
 import CloseBand from '@/components/CloseBand';
 
 export const metadata: Metadata = {
-  title: 'Services',
+  title: 'Insurance Recruitment Services | Retained Search & M&A',
   description:
-    'Retained search, contingent submittal, and M&A consulting for the insurance industry.',
+    'Retained search, contingent submittal, and M&A consulting for insurance carriers, brokerages, captives and programs across the United States.',
+  alternates: { canonical: '/services' },
+  openGraph: {
+    title: 'Insurance Recruitment Services | Retained Search & M&A',
+    description: 'Retained search, contingent submittal, and M&A consulting for insurance carriers, brokerages, captives and programs across the United States.',
+    url: '/services',
+    type: 'website',
+  },
 };
 
 export default function Services() {

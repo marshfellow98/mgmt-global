@@ -3,14 +3,24 @@ import Reveal from '@/components/Reveal';
 import Line from '@/components/Line';
 import PinnedSection from '@/components/PinnedSection';
 import Globe from '@/components/Globe';
+import PathDiagram from '@/components/PathDiagram';
 import CloseBand from '@/components/CloseBand';
 import ProcessLedger from '@/components/ProcessLedger';
 import ServiceShell from '../ServiceShell';
-import { PROCESS_STEPS, PROCESS_GLOBE, RETAINED_LEDGER } from '@/lib/content';
+import { JsonLd, serviceSchema, breadcrumbSchema } from '@/lib/schema';
+import { PROCESS_STEPS, PROCESS_GLOBE, PROCESS_PATH, PROCESS_WAYPOINTS, RETAINED_LEDGER } from '@/lib/content';
 
 export const metadata: Metadata = {
-  title: 'Retained Search',
-  description: 'A dedicated executive search partnership for the hires that matter most.',
+  title: 'Retained Executive Search for Insurance | MGMTGlobal',
+  description:
+    'A dedicated retained search partnership for insurance C-suite, producer and practice-leader hires. Three to four vetted finalists, complete discretion.',
+  alternates: { canonical: '/services/retained-search' },
+  openGraph: {
+    title: 'Retained Executive Search for Insurance | MGMTGlobal',
+    description: 'A dedicated retained search partnership for insurance C-suite, producer and practice-leader hires. Three to four vetted finalists, complete discretion.',
+    url: '/services/retained-search',
+    type: 'website',
+  },
 };
 
 const IDEAL = ['Executive leadership', 'C-suite positions', 'Regional leadership', 'Practice leaders',
@@ -20,6 +30,21 @@ const WHY = ['Exclusive search partnership', 'Dedicated consulting team', 'Confi
 
 export default function RetainedSearch() {
   return (
+    <>
+      <JsonLd
+        data={[
+          serviceSchema({
+            name: 'Retained Search',
+            description: 'A dedicated retained executive search partnership for insurance C-suite, producer and practice-leader hires.',
+            path: '/services/retained-search',
+          }),
+          breadcrumbSchema([
+            { name: 'Home', path: '/' },
+            { name: 'Services', path: '/services' },
+            { name: 'Retained Search', path: '/services/retained-search' },
+          ]),
+        ]}
+      />
     <ServiceShell
       kick="Retained Search"
       heading={<><Line>A screening method</Line><Line><>designed for <em className="accent">high performers.</em></></Line></>}
@@ -75,10 +100,14 @@ export default function RetainedSearch() {
       >
         {/* Phase two: the 3D interior. PathDiagram is one line away if this
             ever needs to come back out. */}
-        <Globe waypoints={PROCESS_GLOBE} />
+        <Globe
+          waypoints={PROCESS_GLOBE}
+          fallback={<PathDiagram path={PROCESS_PATH} waypoints={PROCESS_WAYPOINTS} />}
+        />
       </PinnedSection>
 
       <CloseBand />
     </ServiceShell>
+    </>
   );
 }

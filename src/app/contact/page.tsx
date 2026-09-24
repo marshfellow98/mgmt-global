@@ -6,8 +6,16 @@ import Form from '@/components/Form';
 import { CONTACT, CONTACT_TOPICS } from '@/lib/content';
 
 export const metadata: Metadata = {
-  title: 'Contact',
-  description: 'Talk to MGMTGlobal about a search, a placement, or your next move.',
+  title: 'Contact MGMTGlobal | Insurance Executive Search',
+  description:
+    'Talk to MGMTGlobal about a search, a placement, or your next move. Based in Carrollton, Texas, serving clients across the United States.',
+  alternates: { canonical: '/contact' },
+  openGraph: {
+    title: 'Contact MGMTGlobal | Insurance Executive Search',
+    description: 'Talk to MGMTGlobal about a search, a placement, or your next move. Based in Carrollton, Texas, serving clients across the United States.',
+    url: '/contact',
+    type: 'website',
+  },
 };
 
 const DETAILS = [

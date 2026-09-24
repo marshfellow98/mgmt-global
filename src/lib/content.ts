@@ -170,12 +170,13 @@ export const QUOTES = [
     name: 'Christian Claudio', role: 'CEO & CTO · StaffMed Health Partners' },
 ];
 
-/* Individual Accountability is deliberately blank — on the old site it
-   duplicated Professional Growth word for word. Waiting on Shane. */
+/* Individual Accountability was blank on the old site — it duplicated
+   Professional Growth word for word. Written by Shane, Sept 2026. */
 export const VALUES = [
   { title: 'Professional Growth',
     body: 'We foster continuous learning and development, empowering our people and clients to grow, adapt, and lead in an evolving business landscape.' },
-  { title: 'Individual Accountability', body: null, pending: true },
+  { title: 'Individual Accountability',
+    body: 'We own our actions and finish what we start. A career move is a life move, and we treat every one of them that way.' },
   { title: 'Group Collaboration',
     body: 'We believe exceptional outcomes are achieved through teamwork, open communication, and shared expertise across every engagement.' },
   { title: 'Optimistic Attitude',

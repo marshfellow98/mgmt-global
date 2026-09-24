@@ -23,13 +23,27 @@ export default function Home() {
     <>
       <Reveal as="header" immediate className="relative flex min-h-[100svh] items-end overflow-hidden pb-[clamp(5rem,12vh,9rem)]">
         <HeroParallax>
+          {/* Video on desktop, still on phones.
+
+              An autoplaying video is the heaviest single thing a phone does
+              on this site: decoding, memory, and constant competition with
+              scroll for the main thread. The poster frame is the same image
+              and costs a fraction of it. `preload="none"` also stops phones
+              downloading the file at all. */}
           <video
-            autoPlay muted loop playsInline poster={HERO_POSTER}
-            className="h-full w-full object-cover"
+            autoPlay muted loop playsInline
+            preload="none"
+            poster={HERO_POSTER}
+            className="hidden h-full w-full object-cover lg:block"
             style={{ objectPosition: 'center 60%' }}
           >
             <source src={HERO_VIDEO} type="video/mp4" />
           </video>
+          <div
+            aria-hidden="true"
+            className="h-full w-full bg-cover bg-center lg:hidden"
+            style={{ backgroundImage: `url(${HERO_POSTER})`, backgroundPosition: 'center 60%' }}
+          />
         </HeroParallax>
         <div
           className="absolute inset-0"

@@ -179,7 +179,9 @@ export default function GlobeScene({
 }: { progressRef: MutableRefObject<number>; waypoints: GlobeWaypoint[] }) {
   return (
     <Canvas
-      dpr={[1, 1.5]}
+      /* Capped at 1.25x rather than 1.5x: on a high-DPI display the
+         difference is invisible on a wireframe and it's ~30% fewer pixels. */
+      dpr={[1, 1.25]}
       /* Camera distance is derived, not guessed:
            visible height = 2 * z * tan(fov/2)
            z = (diameter / fill) / (2 * tan(fov/2))
