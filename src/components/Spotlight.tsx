@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, type ReactNode, type ElementType } from 'react';
+import { createElement, useEffect, useRef, type ReactNode, type ElementType } from 'react';
 
 /* ============================================================================
    Spotlight
@@ -80,14 +80,14 @@ export default function Spotlight({
     };
   }, []);
 
-  return (
-    <Tag
-      ref={ref as never}
-      className={`spot ${className}`.trim()}
-      style={{ '--spot-size': `${size}px`, '--spot-strength': strength } as React.CSSProperties}
-    >
-      <span className="spot-layer" aria-hidden="true" />
-      {children}
-    </Tag>
+  return createElement(
+    Tag,
+    {
+      ref,
+      className: `spot ${className}`.trim(),
+      style: { '--spot-size': `${size}px`, '--spot-strength': strength } as React.CSSProperties,
+    },
+    <span key="layer" className="spot-layer" aria-hidden="true" />,
+    children
   );
 }

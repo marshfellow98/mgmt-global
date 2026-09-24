@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, type ReactNode, type ElementType } from 'react';
+import { createElement, useEffect, useRef, useState, type ReactNode, type ElementType } from 'react';
 
 /* Adds `is-on` to trigger the masked line reveals and fades in globals.css.
 
@@ -50,9 +50,9 @@ export default function Reveal({
     return () => { io.disconnect(); window.clearTimeout(failsafe); };
   }, [threshold, immediate]);
 
-  return (
-    <Tag ref={ref as never} className={`${on ? 'is-on' : ''} ${className}`.trim()}>
-      {children}
-    </Tag>
+  return createElement(
+    Tag,
+    { ref, className: `${on ? 'is-on' : ''} ${className}`.trim() },
+    children
   );
 }
