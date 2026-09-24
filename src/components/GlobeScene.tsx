@@ -34,7 +34,7 @@ import * as THREE from 'three';
 const GOLD = '#E1A13F';
 const GOLD_PALE = '#EFCFA0';
 const GRID = '#3B4E66';
-const R = 1.6;
+const R = 1.7;
 
 export type GlobeWaypoint = { lat: number; lon: number; label: string };
 
@@ -180,7 +180,7 @@ export default function GlobeScene({
   return (
     <Canvas
       dpr={[1, 1.5]}
-      camera={{ position: [0, 0, 4.05], fov: 38 }}
+      camera={{ position: [0, 0, 4.35], fov: 38 }}
       gl={{ alpha: true, antialias: true, powerPreference: 'low-power' }}
       style={{ background: 'transparent', width: '100%', height: '100%' }}
     >

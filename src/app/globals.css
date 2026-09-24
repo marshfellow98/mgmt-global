@@ -175,15 +175,18 @@ html.js .is-on .fade { opacity: 1; transform: none; }
 .pin-head { padding-top: calc(var(--navh) + clamp(1rem, 3vh, 2.2rem)); }
 .pin-body {
   flex: 1; min-height: 0;
-  display: grid; grid-template-columns: 1fr; align-items: center; gap: 1.5rem;
+  display: grid; grid-template-columns: 1fr; align-items: stretch; gap: 1.5rem;
   max-width: var(--shell); margin: 0 auto; width: 100%;
-  /* Extra bottom padding biases the centred content upward — on a tall
-     viewport it otherwise settles into the lower third. */
-  padding: 0 var(--pad) clamp(4rem, 12vh, 8rem);
+  /* Biases the centred content upward without starving the visual of the
+     height it needs. */
+  padding: 0 var(--pad) clamp(1.5rem, 4vh, 3rem);
 }
 @media (min-width: 900px) { .pin-body { grid-template-columns: 1fr 1fr; gap: 4rem; } }
+/* Without this, an aspect-ratio box overflows its grid row instead of
+   shrinking — which is what clipped the globe top and bottom. */
+.pin-body > * { min-height: 0; min-width: 0; }
 
-.steps { position: relative; min-height: 250px; }
+.steps { position: relative; min-height: 250px; display: flex; align-items: center; }
 .step {
   position: absolute; inset: 0; opacity: 0; transform: translateY(10px);
   transition: opacity .34s ease, transform .34s ease;
@@ -198,25 +201,31 @@ html.js .is-on .fade { opacity: 1; transform: none; }
 .step h3 { font-size: clamp(1.5rem, 3.4vw, 2.4rem); margin-bottom: 1rem; line-height: 1.12; }
 .step p { font-size: clamp(.95rem, 1.5vw, 1.05rem); max-width: 40ch; margin: 0; }
 
-/* Capped so it can't outgrow its column on a wide monitor. */
+/* Sized from its own grid cell, not from viewport fractions.
+   The earlier version guessed at vh while the heading, the progress bars and
+   the padding were all drawing from that same budget — on a short window it
+   overflowed and got clipped top and bottom. height:100% of a stretched cell
+   plus aspect-ratio means it can never exceed the space it actually has. */
 .viz {
-  position: relative; width: 100%;
-  max-width: min(600px, 44vw);
-  aspect-ratio: 1; max-height: min(60vh, 600px);
-  justify-self: center; margin: 0 auto;
+  position: relative;
+  height: 100%;
+  aspect-ratio: 1;
+  max-width: 100%;
+  margin: 0 auto;
+  justify-self: center;
 }
 .viz svg { width: 100%; height: 100%; overflow: hidden; display: block; }
-@media (max-height: 760px) {
-  .viz { max-height: 34vh; max-width: min(330px, 34vw); }
+@media (max-height: 820px) {
   .step h3 { font-size: clamp(1.2rem, 2.6vw, 1.7rem); }
+  .pin-head { padding-top: calc(var(--navh) + .5rem); }
 }
 
 /* Below the two-column breakpoint the diagram sits above the text and has the
    full column to itself, so the 40vw cap (156px on a phone) is far too mean. */
 @media (max-width: 899px) {
-  .viz { max-width: min(300px, 62vw); max-height: 30vh; }
-  .steps { min-height: 210px; }
-  .pin-body { gap: 1rem; }
+  .viz { height: auto; width: min(320px, 68vw); max-height: 34vh; }
+  .steps { min-height: 190px; }
+  .pin-body { gap: 1rem; align-items: center; }
 }
 
 .road { fill: none; stroke: #1B2634; stroke-width: 2; }
