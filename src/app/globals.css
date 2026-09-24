@@ -177,7 +177,9 @@ html.js .is-on .fade { opacity: 1; transform: none; }
   flex: 1; min-height: 0;
   display: grid; grid-template-columns: 1fr; align-items: center; gap: 1.5rem;
   max-width: var(--shell); margin: 0 auto; width: 100%;
-  padding: 0 var(--pad) clamp(2rem, 5vh, 3rem);
+  /* Extra bottom padding biases the centred content upward — on a tall
+     viewport it otherwise settles into the lower third. */
+  padding: 0 var(--pad) clamp(4rem, 12vh, 8rem);
 }
 @media (min-width: 900px) { .pin-body { grid-template-columns: 1fr 1fr; gap: 4rem; } }
 
@@ -199,14 +201,22 @@ html.js .is-on .fade { opacity: 1; transform: none; }
 /* Capped so it can't outgrow its column on a wide monitor. */
 .viz {
   position: relative; width: 100%;
-  max-width: min(430px, 40vw);
-  aspect-ratio: 1; max-height: min(46vh, 430px);
+  max-width: min(600px, 44vw);
+  aspect-ratio: 1; max-height: min(60vh, 600px);
   justify-self: center; margin: 0 auto;
 }
 .viz svg { width: 100%; height: 100%; overflow: hidden; display: block; }
 @media (max-height: 760px) {
   .viz { max-height: 34vh; max-width: min(330px, 34vw); }
   .step h3 { font-size: clamp(1.2rem, 2.6vw, 1.7rem); }
+}
+
+/* Below the two-column breakpoint the diagram sits above the text and has the
+   full column to itself, so the 40vw cap (156px on a phone) is far too mean. */
+@media (max-width: 899px) {
+  .viz { max-width: min(300px, 62vw); max-height: 30vh; }
+  .steps { min-height: 210px; }
+  .pin-body { gap: 1rem; }
 }
 
 .road { fill: none; stroke: #1B2634; stroke-width: 2; }
@@ -376,6 +386,13 @@ html.js .is-on .fade { opacity: 1; transform: none; }
 .scard:nth-of-type(2) { top: calc(var(--navh) + 3rem); }
 .scard:nth-of-type(3) { top: calc(var(--navh) + 4.5rem); }
 .scard:nth-of-type(4) { top: calc(var(--navh) + 6rem); }
+
+@media (max-width: 879px) {
+  .scard:nth-of-type(1) { top: calc(var(--navh) + .75rem); }
+  .scard:nth-of-type(2) { top: calc(var(--navh) + 1.5rem); }
+  .scard:nth-of-type(3) { top: calc(var(--navh) + 2.25rem); }
+  .scard:nth-of-type(4) { top: calc(var(--navh) + 3rem); }
+}
 
 @media (min-width: 880px) { .scard { grid-template-columns: .42fr 1fr; gap: 3.5rem; align-items: start; } }
 .scard .idx { font-family: var(--font-sans), sans-serif; font-size: .66rem; letter-spacing: .2em; color: var(--gold); font-weight: 600; }
