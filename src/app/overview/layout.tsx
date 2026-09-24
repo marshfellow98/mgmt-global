@@ -8,6 +8,10 @@ export default function OverviewLayout({ children }: { children: React.ReactNode
       <style>{`
         body > nav, body > footer, body > div[id="mobile-menu"] { display: none !important; }
         body { overflow: hidden; }
+        /* No page-transition transform on this route: a transformed ancestor
+           becomes the containing block for the deck's fixed container, which
+           collapses it to zero height. */
+        .page-enter { animation: none !important; transform: none !important; }
       `}</style>
       {children}
     </>

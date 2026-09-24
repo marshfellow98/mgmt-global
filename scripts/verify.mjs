@@ -121,5 +121,26 @@ const ok  = (m) => console.log('  ok   ' + m);
   else ok(`sitemap covers all ${routes.length} routes`);
 }
 
+// ---------- 8. Fixed full-screen containers size themselves explicitly ----------
+{
+  /* A `fixed` element stretched with inset-0 resolves against the nearest
+     ancestor with a transform — not the viewport. template.tsx animates a
+     transform on every page, so inset-0 collapses to zero height. Anything
+     meant to fill the screen must use explicit viewport units. */
+  const walk = (dir) => readdirSync(dir, { withFileTypes: true }).flatMap((e) =>
+    e.isDirectory() ? walk(join(dir, e.name)) : [join(dir, e.name)]);
+  const files = [...walk('src/app'), ...walk('src/components')].filter((f) => f.endsWith('.tsx'));
+  for (const f of files) {
+    const src = readFileSync(f, 'utf8');
+    for (const m of src.matchAll(/className="[^"]*\bfixed\b[^"]*\binset-0\b[^"]*"/g)) {
+      const after = src.slice(m.index, m.index + 400);
+      const sized = /100svh|100vh|h-screen/.test(after);
+      const isOverlay = /pointer-events-none|z-\d/.test(m[0]);
+      if (!sized && !isOverlay) bad(`${f}: fixed inset-0 without explicit viewport height — collapses under a transformed ancestor`);
+    }
+  }
+  ok('fixed full-screen containers sized explicitly');
+}
+
 console.log(fail ? `\n${fail} problem(s) found.` : '\nAll checks passed.');
 process.exit(fail ? 1 : 0);

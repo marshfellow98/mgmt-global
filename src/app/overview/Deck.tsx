@@ -70,8 +70,17 @@ export default function Deck() {
   };
 
   return (
+    /* Sized explicitly, not by stretching between inset edges.
+
+       template.tsx wraps every page in an animated transform, and any
+       ancestor with a transform becomes the containing block for `fixed`
+       descendants instead of the viewport. That wrapper has zero height —
+       its only child is fixed and so out of the flow — which collapsed this
+       container to nothing and rendered a black screen. Explicit viewport
+       units are immune to whatever the ancestor happens to be. */
     <div
-      className="fixed inset-0 overflow-hidden bg-ink"
+      className="fixed left-0 top-0 overflow-hidden bg-ink"
+      style={{ width: '100vw', height: '100svh' }}
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
     >
