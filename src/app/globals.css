@@ -433,6 +433,21 @@ html.js .is-on .fade { opacity: 1; transform: none; }
 .hrow:hover h4 { color: var(--gold); }
 .hrow .meta { font-size: .76rem; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
 
+/* ============================================================================
+   Process ledger (service pages)
+   ============================================================================ */
+.ledger-n, .ledger-title { color: #55637A; transition: color .45s ease; }
+.ledger-detail { opacity: .55; transition: opacity .45s ease; }
+.ledger-dot { transition: background-color .35s ease, border-color .35s ease, box-shadow .35s ease; }
+
+.ledger-row[data-on="true"] .ledger-n { color: var(--gold); }
+.ledger-row[data-on="true"] .ledger-title { color: #fff; }
+.ledger-row[data-on="true"] .ledger-detail { opacity: 1; }
+.ledger-row[data-on="true"] .ledger-dot {
+  background: var(--gold); border-color: var(--gold);
+  box-shadow: 0 0 0 4px rgba(225,161,63,.18);
+}
+
 /* ============================================================
    Misc
    ============================================================ */
