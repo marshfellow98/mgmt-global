@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import Reveal from '@/components/Reveal';
 import Line from '@/components/Line';
 import CloseBand from '@/components/CloseBand';
+import ProcessLedger from '@/components/ProcessLedger';
+import { MA_LEDGER } from '@/lib/content';
 import ServiceShell from '../ServiceShell';
 
 export const metadata: Metadata = {
@@ -43,7 +45,9 @@ export default function MAConsulting() {
               <a className="lnk" href="#">Download the overview (PDF) <span>&rarr;</span></a>
             </p>
           </div>
-          <div className="ph fade d1 aspect-[3/4]">M&amp;A Consulting — image</div>
+          <div className="fade d1 aspect-[3/4]">
+            <ProcessLedger {...MA_LEDGER} />
+          </div>
         </Reveal>
       </section>
 
