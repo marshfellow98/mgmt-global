@@ -33,7 +33,7 @@ import * as THREE from 'three';
 
 const GOLD = '#E1A13F';
 const GOLD_PALE = '#EFCFA0';
-const GRID = '#243244';
+const GRID = '#3B4E66';
 const R = 1.6;
 
 export type GlobeWaypoint = { lat: number; lon: number; label: string };
@@ -114,7 +114,7 @@ function Scene({
       const node = nodeRefs.current[i];
       const halo = haloRefs.current[i];
       if (node) {
-        (node.material as THREE.MeshBasicMaterial).color.set(reached ? GOLD : GRID);
+        (node.material as THREE.MeshBasicMaterial).color.set(reached ? GOLD : '#5A6B82');
       }
       if (halo) {
         const near = 1 - Math.min(Math.abs(p - at) / 0.06, 1);
@@ -130,13 +130,13 @@ function Scene({
       {/* The globe. Wireframe segments double as lat/long lines. */}
       <mesh>
         <sphereGeometry args={[R, 28, 18]} />
-        <meshBasicMaterial color={GRID} wireframe transparent opacity={0.55} />
+        <meshBasicMaterial color={GRID} wireframe transparent opacity={0.8} />
       </mesh>
 
       {/* A faint solid core so the far side of the wireframe reads dimmer. */}
       <mesh>
         <sphereGeometry args={[R * 0.985, 32, 24]} />
-        <meshBasicMaterial color="#05070A" transparent opacity={0.72} />
+        <meshBasicMaterial color="#05070A" transparent opacity={0.6} />
       </mesh>
 
       {/* Arcs. dashSize equals the full length, so dashOffset from 0 to -1
@@ -147,7 +147,7 @@ function Scene({
           ref={(el) => { arcRefs.current[i] = el as unknown as ArcLine; }}
           points={points}
           color={GOLD}
-          lineWidth={1.6}
+          lineWidth={2.4}
           dashed
           dashScale={1}
           dashSize={1}
@@ -161,11 +161,11 @@ function Scene({
       {pts.map((v, i) => (
         <group key={`wp-${i}`} position={v}>
           <mesh ref={(el) => { haloRefs.current[i] = el; }}>
-            <sphereGeometry args={[0.055, 12, 12]} />
+            <sphereGeometry args={[0.075, 12, 12]} />
             <meshBasicMaterial color={GOLD_PALE} transparent opacity={0} />
           </mesh>
           <mesh ref={(el) => { nodeRefs.current[i] = el; }}>
-            <sphereGeometry args={[0.045, 12, 12]} />
+            <sphereGeometry args={[0.06, 12, 12]} />
             <meshBasicMaterial color={GRID} />
           </mesh>
         </group>
@@ -180,7 +180,7 @@ export default function GlobeScene({
   return (
     <Canvas
       dpr={[1, 1.5]}
-      camera={{ position: [0, 0, 4.6], fov: 38 }}
+      camera={{ position: [0, 0, 4.05], fov: 38 }}
       gl={{ alpha: true, antialias: true, powerPreference: 'low-power' }}
       style={{ background: 'transparent', width: '100%', height: '100%' }}
     >

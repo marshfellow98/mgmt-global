@@ -47,8 +47,17 @@ export default function Globe({ waypoints }: { waypoints: GlobeWaypoint[] }) {
   useScrollProgress((p) => { progressRef.current = p; });
 
   return (
-    <div className="h-full w-full">
-      <GlobeScene progressRef={progressRef} waypoints={waypoints} />
+    <div className="relative h-full w-full">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 rounded-full"
+        style={{
+          background: 'radial-gradient(circle, rgba(225,161,63,.16) 0%, rgba(225,161,63,.05) 42%, rgba(225,161,63,0) 68%)',
+        }}
+      />
+      <div className="relative h-full w-full">
+        <GlobeScene progressRef={progressRef} waypoints={waypoints} />
+      </div>
     </div>
   );
 }
