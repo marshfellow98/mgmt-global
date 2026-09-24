@@ -4,8 +4,9 @@ import Line from '@/components/Line';
 import PinnedSection from '@/components/PinnedSection';
 import Globe from '@/components/Globe';
 import CloseBand from '@/components/CloseBand';
+import ProcessLedger from '@/components/ProcessLedger';
 import ServiceShell from '../ServiceShell';
-import { PROCESS_STEPS, PROCESS_GLOBE } from '@/lib/content';
+import { PROCESS_STEPS, PROCESS_GLOBE, RETAINED_LEDGER } from '@/lib/content';
 
 export const metadata: Metadata = {
   title: 'Retained Search',
@@ -46,7 +47,9 @@ export default function RetainedSearch() {
               <a className="lnk" href="#">Download the overview (PDF) <span>&rarr;</span></a>
             </p>
           </div>
-          <div className="ph fade d1 aspect-[3/4]">Retained Search — image</div>
+          <div className="fade d1 aspect-[3/4]">
+            <ProcessLedger {...RETAINED_LEDGER} />
+          </div>
         </Reveal>
       </section>
 
