@@ -26,6 +26,9 @@
 const BASE = 'https://api.recruiterflow.com';
 const REVALIDATE = 900; // 15 minutes
 
+/* Where to send someone if a role has no apply_link of its own. */
+const CAREERS_FALLBACK = 'https://app.recruiterflow.com/mgmtglobal/jobs';
+
 export type Job = {
   id: string;
   title: string;
@@ -66,7 +69,9 @@ function normalise(raw: RawJob): Job {
     location: formatLocation(raw.locations),
     employmentType: raw.employment_type || raw.job_type?.name || null,
     description: raw.about_position ?? null,
-    applyUrl: raw.apply_link ?? null,
+    /* Falls back to the hosted careers page. A listing with a slightly
+       generic link is far better than a role that silently doesn't exist. */
+    applyUrl: raw.apply_link ?? CAREERS_FALLBACK,
   };
 }
 
@@ -91,22 +96,62 @@ export async function getOpenJobs(): Promise<Job[]> {
 
     if (!res.ok) {
       // Log the status only — never the key or the request URL.
-      console.error('Recruiterflow responded', res.status);
+      const body = await res.text().catch(() => '');
+      console.error('[RF] responded', res.status, body.slice(0, 300));
       return [];
     }
 
     const json: unknown = await res.json();
+
+    /* Diagnostic logging.
+
+       The field names below were taken from the staging sample in
+       Recruiterflow's OpenAPI spec, not from a real response on this
+       account. If the shapes differ, jobs get silently filtered away and
+       the page looks broken for no visible reason — which is exactly what
+       happened. So: log the envelope and the first record's keys, once per
+       fetch, to Render's logs.
+
+       Never logs field VALUES, only names — a job record carries client and
+       salary data that shouldn't sit in a log. Remove this block once the
+       board is confirmed working. */
+    const envelopeKeys = json && typeof json === 'object' && !Array.isArray(json)
+      ? Object.keys(json as Record<string, unknown>)
+      : '(array)';
+    console.log('[RF] envelope:', JSON.stringify(envelopeKeys));
+
     const list: RawJob[] = Array.isArray(json)
       ? (json as RawJob[])
-      : ((json as Record<string, unknown>)?.data as RawJob[]) ?? [];
+      : ((json as Record<string, unknown>)?.data as RawJob[]) ??
+        ((json as Record<string, unknown>)?.jobs as RawJob[]) ??
+        ((json as Record<string, unknown>)?.results as RawJob[]) ??
+        [];
 
-    return list
-      // only_open filters server-side, but publish_to_careers_page is the
-      // flag Shane actually toggles per role, so respect it too.
-      .filter((j) => j.publish_to_careers_page !== false && j.is_open !== false)
-      .map(normalise)
-      // A role with no apply link would be a dead end.
-      .filter((j) => j.applyUrl);
+    console.log('[RF] records returned:', list.length);
+    if (list[0]) {
+      console.log('[RF] first record fields:', JSON.stringify(Object.keys(list[0])));
+      console.log('[RF] gate values:', JSON.stringify({
+        is_open: list[0].is_open,
+        publish_to_careers_page: list[0].publish_to_careers_page,
+        has_apply_link: Boolean(list[0].apply_link),
+        has_title: Boolean(list[0].title || list[0].name),
+      }));
+    }
+
+    /* Filters loosened deliberately.
+
+       The previous version dropped any job where publish_to_careers_page
+       was not explicitly true-ish, and any job without an apply_link. If
+       either field is absent or named differently on this account, every
+       job disappears. Now only an explicit `false` excludes a role, and a
+       missing apply link falls back to the careers page rather than
+       removing the listing entirely. */
+    const mapped = list
+      .filter((j) => j.is_open !== false)
+      .map(normalise);
+
+    console.log('[RF] after filtering:', mapped.length);
+    return mapped;
   } catch (err) {
     console.error('Recruiterflow fetch failed', err instanceof Error ? err.name : 'unknown');
     return [];
