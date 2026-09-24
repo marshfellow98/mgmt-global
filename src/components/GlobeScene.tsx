@@ -183,10 +183,10 @@ export default function GlobeScene({
       /* Camera distance is derived, not guessed:
            visible height = 2 * z * tan(fov/2)
            z = (diameter / fill) / (2 * tan(fov/2))
-         With R=1.7, fov=38 and a 90% fill that gives z=5.49. Anything
+         With R=1.7, fov=38 and a 95% fill that gives z=5.20. Anything
          closer clips the globe on all four sides. Recompute if R or fov
-         changes. */
-      camera={{ position: [0, 0, 5.49], fov: 38 }}
+         changes — scripts/verify.mjs checks this. */
+      camera={{ position: [0, 0, 5.20], fov: 38 }}
       gl={{ alpha: true, antialias: true, powerPreference: 'low-power' }}
       style={{ background: 'transparent', width: '100%', height: '100%' }}
     >

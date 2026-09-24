@@ -67,14 +67,19 @@ export default function ProcessLedger({
     let running = false;
 
     const target = () => {
-      const r = el.getBoundingClientRect();
-      const vh = window.innerHeight;
-      // Start when the panel's top is 80% down the screen; finish when its
-      // bottom is 30% down. That keeps the action in the middle band, where
-      // the reader is actually looking.
-      const start = vh * 0.8;
-      const end = vh * 0.3;
-      return clamp((start - r.top) / (start - end + r.height));
+      // While stuck, the panel's own rect stops moving — so measure the
+      // parent column instead, which keeps travelling behind it. Progress
+      // runs across the distance the panel stays pinned.
+      const track = el.parentElement;
+      if (!track) return 0;
+      const r = track.getBoundingClientRect();
+      const travel = r.height - el.offsetHeight;
+      if (travel <= 0) {
+        const vh = window.innerHeight;
+        return clamp((vh * 0.8 - r.top) / (vh * 0.5 + r.height));
+      }
+      const stuckTop = parseFloat(getComputedStyle(el).top) || 0;
+      return clamp((stuckTop - r.top) / travel);
     };
 
     const tick = () => {
@@ -108,10 +113,14 @@ export default function ProcessLedger({
     };
   }, [items]);
 
+  /* Sticky inside its own grid column: the panel holds in place while the
+     copy beside it scrolls past, which is what "pinned" means here without
+     hijacking the whole viewport. The parent column is taller than the panel
+     (see the pages), giving it distance to travel. */
   return (
     <div
       ref={ref}
-      className="ledger relative flex h-full w-full flex-col overflow-hidden border border-rule bg-char2"
+      className="ledger sticky top-[calc(var(--navh)+2rem)] flex h-[clamp(420px,72vh,640px)] w-full flex-col overflow-hidden border border-rule bg-char2"
     >
       {/* The one flourish: a large word, barely there. */}
       <div

@@ -27,7 +27,7 @@ export default function RetainedSearch() {
       active="retained-search"
     >
       <section className="py-[clamp(4rem,10vw,9rem)]">
-        <Reveal className="shell grid gap-10 lg:grid-cols-2 lg:gap-[4.5rem]">
+        <Reveal className="shell grid items-start gap-10 lg:grid-cols-2 lg:gap-[4.5rem]">
           <div>
             <h2 className="display text-[clamp(1.6rem,3.6vw,2.6rem)]"><Line>The partnership</Line></h2>
             <p className="fade d2">
@@ -47,7 +47,9 @@ export default function RetainedSearch() {
               <a className="lnk" href="#">Download the overview (PDF) <span>&rarr;</span></a>
             </p>
           </div>
-          <div className="fade d1 aspect-[3/4]">
+          {/* Taller than the panel inside it: that extra height is the
+              distance the sticky ledger stays pinned for. */}
+          <div className="fade d1 min-h-[160vh]">
             <ProcessLedger {...RETAINED_LEDGER} />
           </div>
         </Reveal>
