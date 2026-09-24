@@ -71,6 +71,15 @@ export const PROCESS_WAYPOINTS = [
   { x: 252, y: 372, label: 'Placement', anchor: 'end'   as const },
 ];
 
+/* Globe positions for the retained-search process. Longitudes step ~70°
+   apart so the globe turns meaningfully between stops. */
+export const PROCESS_GLOBE = [
+  { lat: 18,  lon: 20,  label: 'Brief' },
+  { lat: -8,  lon: 92,  label: 'Market' },
+  { lat: 26,  lon: 164, label: 'Shortlist' },
+  { lat: -14, lon: 236, label: 'Placement' },
+];
+
 export const ADVANTAGE_STEPS = [
   { n: '01', title: 'One industry, total depth.',
     body: 'We live in insurance. Every search begins with knowledge most firms have to go and learn on your time.' },
