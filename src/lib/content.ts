@@ -80,6 +80,40 @@ export const PROCESS_GLOBE = [
   { lat: -14, lon: 236, label: 'Placement' },
 ];
 
+/* Ledgers for the three service pages. Each replaces the old stock-photo
+   slot. Wording is lifted from the existing copy, not invented. */
+export const RETAINED_LEDGER = {
+  kick: 'A search, start to finish',
+  watermark: 'Search',
+  items: [
+    { n: '01', title: 'Brief',     detail: 'Your company, your culture, what success looks like.' },
+    { n: '02', title: 'Market',    detail: 'Quiet outreach to people who aren’t looking.' },
+    { n: '03', title: 'Shortlist', detail: 'Three or four finalists, fully evaluated.' },
+    { n: '04', title: 'Close',     detail: 'Interviews, negotiation, the signature.' },
+  ],
+};
+
+export const CONTINGENT_LEDGER = {
+  kick: 'How an introduction happens',
+  watermark: 'Place',
+  items: [
+    { n: '01', title: 'Meet',  detail: 'Exceptional people we already know from retained work.' },
+    { n: '02', title: 'Match', detail: 'The right one, brought to the right organization.' },
+    { n: '03', title: 'Place', detail: 'You pay only on a successful placement.' },
+  ],
+};
+
+export const MA_LEDGER = {
+  kick: 'Before, during, and after',
+  watermark: 'Merge',
+  items: [
+    { n: '01', title: 'Assess',  detail: 'Leadership, honestly evaluated.' },
+    { n: '02', title: 'Align',   detail: 'The organization around the deal.' },
+    { n: '03', title: 'Retain',  detail: 'The people the deal was for.' },
+    { n: '04', title: 'Recruit', detail: 'Whoever the new shape still needs.' },
+  ],
+};
+
 export const ADVANTAGE_STEPS = [
   { n: '01', title: 'One industry, total depth.',
     body: 'We live in insurance. Every search begins with knowledge most firms have to go and learn on your time.' },
