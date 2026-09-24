@@ -55,7 +55,10 @@ export default function Nav() {
         {!solid && !open && (
           <div
             className="pointer-events-none absolute inset-0"
-            style={{ background: 'linear-gradient(to bottom,rgba(5,7,10,.92) 0%,rgba(5,7,10,.55) 55%,rgba(5,7,10,0) 100%)' }}
+            /* Was .92 at the top, which read as a black band across the
+               hero. Staging has no scrim at all; this keeps just enough to
+               hold the links legible over bright sky. */
+            style={{ background: 'linear-gradient(to bottom,rgba(5,7,10,.52) 0%,rgba(5,7,10,.24) 60%,rgba(5,7,10,0) 100%)' }}
           />
         )}
 

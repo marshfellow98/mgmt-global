@@ -48,9 +48,20 @@ export default function Home() {
         <div
           className="absolute inset-0"
           style={{
+            /* Matched to the staging hero, which Shane likes: one horizontal
+               fade, nothing over the top, nothing darkening the sky.
+
+               Staging uses a 90deg gradient at .82 from 25%, clearing by
+               100%, on a layer at .9 opacity — an effective .74 at its
+               darkest. Our previous stack did three things at once (a .96
+               diagonal, a bottom-up fade, and the nav's own scrim) which is
+               what made the top read as black.
+
+               The short bottom fade is the one addition: the glass stat
+               panel overlaps the hero there and needs a little separation. */
             background:
-              'linear-gradient(105deg,rgba(5,7,10,.96) 0%,rgba(5,7,10,.82) 38%,rgba(5,7,10,.25) 78%),' +
-              'linear-gradient(to top,rgba(5,7,10,.86) 0%,rgba(5,7,10,.30) 22%,rgba(5,7,10,0) 46%)',
+              'linear-gradient(90deg,rgba(5,7,10,.80) 0%,rgba(5,7,10,.74) 25%,rgba(5,7,10,.08) 92%,rgba(5,7,10,0) 100%),' +
+              'linear-gradient(to top,rgba(5,7,10,.55) 0%,rgba(5,7,10,0) 26%)',
           }}
         />
         <div
