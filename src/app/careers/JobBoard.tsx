@@ -46,7 +46,7 @@ export default function JobBoard({ jobs, locations }: { jobs: Job[]; locations: 
           >
             <h4>{job.title}</h4>
             <div className="meta">
-              {[job.location, job.workplace, job.employmentType].filter(Boolean).join(' · ')}
+              {[job.location, job.employmentType].filter(Boolean).join(' · ')}
             </div>
           </a>
         ))}

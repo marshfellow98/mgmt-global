@@ -258,6 +258,34 @@ not having it. Confirm with Shane before launch.
 Linked from: the hero prompt, the footer, the careers page, and the contact
 page (as an exit for anyone hesitating over the employer field).
 
+## Recruiterflow
+
+Written against the OpenAPI spec at recruiterflow.com/api. The first pass was
+guessed from the help articles and got four things wrong — worth recording so
+nobody reintroduces them:
+
+| Wrong | Right |
+|---|---|
+| `recruiterflow.com/api/external` | `api.recruiterflow.com` |
+| `X-API-KEY` header | `RF-Api-Key` header |
+| `?status=open` | `?only_open=1` |
+| `location`, `workplace_type` | `locations[]` array, no workplace field |
+
+Useful query params: `only_open`, `include_description`, `include_notes`,
+`include_count`, `items_per_page`, `current_page`.
+
+Response fields we use: `id`, `title`, `about_position`, `apply_link`,
+`employment_type`, `locations[]`, `is_open`, `publish_to_careers_page`.
+
+**The key is account-level.** Recruiterflow has no jobs-only credential, so
+the same key reads candidates, clients and deals. It must never reach the
+browser — hence no `NEXT_PUBLIC_` prefix and server-only fetching. Don't log
+the key or the request URL.
+
+**Not the iframe.** Recruiterflow support suggested embedding their hosted
+careers page. That would drop their fonts, colours and scrollbar into the
+middle of ours. The API keeps roles in our own design.
+
 ## Forms
 
 Both relay straight to an inbox via Resend. Nothing is stored — no database,
