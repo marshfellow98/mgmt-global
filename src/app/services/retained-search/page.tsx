@@ -4,7 +4,7 @@ import Line from '@/components/Line';
 import PinnedSection from '@/components/PinnedSection';
 import Globe from '@/components/Globe';
 import CloseBand from '@/components/CloseBand';
-import LedgerSection from '@/components/LedgerSection';
+import ProcessLedger from '@/components/ProcessLedger';
 import ServiceShell from '../ServiceShell';
 import { PROCESS_STEPS, PROCESS_GLOBE, RETAINED_LEDGER } from '@/lib/content';
 
@@ -48,7 +48,7 @@ export default function RetainedSearch() {
             </p>
           </div>
           <div className="fade d1 aspect-[3/4]">
-            <div className="ph h-full w-full">Retained Search — image</div>
+            <ProcessLedger {...RETAINED_LEDGER} />
           </div>
         </Reveal>
       </section>
@@ -65,8 +65,6 @@ export default function RetainedSearch() {
           </div>
         </Reveal>
       </section>
-
-      <LedgerSection {...RETAINED_LEDGER} />
 
       <PinnedSection
         kick="How it works · Retained search in four steps"

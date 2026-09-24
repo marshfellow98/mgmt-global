@@ -9,7 +9,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start -p ${PORT:-3000}",
-    "lint": "next lint"
+    "lint": "next lint",
+    "verify": "node scripts/verify.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.8",

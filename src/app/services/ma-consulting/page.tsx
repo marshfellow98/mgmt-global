@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Reveal from '@/components/Reveal';
 import Line from '@/components/Line';
 import CloseBand from '@/components/CloseBand';
-import LedgerSection from '@/components/LedgerSection';
+import ProcessLedger from '@/components/ProcessLedger';
 import { MA_LEDGER } from '@/lib/content';
 import ServiceShell from '../ServiceShell';
 
@@ -46,7 +46,7 @@ export default function MAConsulting() {
             </p>
           </div>
           <div className="fade d1 aspect-[3/4]">
-            <div className="ph h-full w-full">M&amp;A Consulting — image</div>
+            <ProcessLedger {...MA_LEDGER} />
           </div>
         </Reveal>
       </section>
@@ -67,8 +67,6 @@ export default function MAConsulting() {
           </div>
         </Reveal>
       </section>
-
-      <LedgerSection {...MA_LEDGER} />
 
       <CloseBand />
     </ServiceShell>
