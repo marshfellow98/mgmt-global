@@ -2,10 +2,10 @@ import type { Metadata } from 'next';
 import Reveal from '@/components/Reveal';
 import Line from '@/components/Line';
 import PinnedSection from '@/components/PinnedSection';
-import PathDiagram from '@/components/PathDiagram';
+import Globe from '@/components/Globe';
 import CloseBand from '@/components/CloseBand';
 import ServiceShell from '../ServiceShell';
-import { PROCESS_STEPS, PROCESS_PATH, PROCESS_WAYPOINTS } from '@/lib/content';
+import { PROCESS_STEPS, PROCESS_GLOBE } from '@/lib/content';
 
 export const metadata: Metadata = {
   title: 'Retained Search',
@@ -68,7 +68,9 @@ export default function RetainedSearch() {
         heading={<><Line>A search process you</Line><Line><>can <em className="accent">actually understand.</em></></Line></>}
         steps={PROCESS_STEPS}
       >
-        <PathDiagram path={PROCESS_PATH} waypoints={PROCESS_WAYPOINTS} />
+        {/* Phase two: the 3D interior. PathDiagram is one line away if
+            this ever needs to come back out. */}
+        <Globe waypoints={PROCESS_GLOBE} />
       </PinnedSection>
 
       <CloseBand />
