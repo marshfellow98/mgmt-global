@@ -142,5 +142,14 @@ const ok  = (m) => console.log('  ok   ' + m);
   ok('fixed full-screen containers sized explicitly');
 }
 
+// ---------- 9. Deck ambience covers every slide ----------
+{
+  const src = readFileSync('src/lib/deck.ts', 'utf8');
+  const slides = (src.match(/\n    kind: '/g) || []).length;
+  const amb = (src.match(/\{ x: '/g) || []).length;
+  if (slides !== amb) bad(`deck has ${slides} slides but ${amb} ambience entries — later slides lose their light`);
+  else ok(`deck: ${slides} slides, ${amb} ambience entries`);
+}
+
 console.log(fail ? `\n${fail} problem(s) found.` : '\nAll checks passed.');
 process.exit(fail ? 1 : 0);

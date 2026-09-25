@@ -1,7 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { DECK, type Slide } from '@/lib/deck';
+import { DECK, AMBIENCE, type Slide } from '@/lib/deck';
+import Counter from '@/components/Counter';
 
 /* ============================================================================
    Deck — a pitch deck that lives at a URL.
@@ -84,9 +85,49 @@ export default function Deck() {
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
     >
-      {/* The track: every slide side by side, moved as one. */}
+      {/* ---- Layer 1: ambient light. Moves at 35% of the content's rate,
+           so the light appears to sit far behind and drift as you pass. ---- */}
       <div
-        className="flex h-full"
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0"
+        style={{
+          transform: `translate3d(-${(i * 35) / DECK.length}%, 0, 0)`,
+          transition: reduced ? 'none' : 'transform 1.1s cubic-bezier(.22,1,.36,1)',
+        }}
+      >
+        <div
+          className="h-full w-full transition-[background] duration-700"
+          style={{
+            background: `radial-gradient(${AMBIENCE[i]?.size ?? '70vw'} circle at ${AMBIENCE[i]?.x ?? '50%'} ${AMBIENCE[i]?.y ?? '40%'}, rgba(225,161,63,${AMBIENCE[i]?.alpha ?? 0.15}) 0%, rgba(225,161,63,0) 62%)`,
+          }}
+        />
+      </div>
+
+      {/* ---- Layer 2: the slide number as an enormous ghost. Moves at 60%,
+           between the light and the content — the middle distance. ---- */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 flex items-center justify-end overflow-hidden pr-[3vw]"
+        style={{
+          transform: `translate3d(-${(i * 60) / DECK.length}%, 0, 0)`,
+          transition: reduced ? 'none' : 'transform 1s cubic-bezier(.22,1,.36,1)',
+        }}
+      >
+        <span
+          className="select-none font-display font-semibold leading-none transition-opacity duration-700"
+          style={{
+            fontSize: 'clamp(16rem, 42vw, 40rem)',
+            color: 'rgba(225,161,63,.035)',
+            letterSpacing: '-0.06em',
+          }}
+        >
+          {String(i + 1).padStart(2, '0')}
+        </span>
+      </div>
+
+      {/* ---- Layer 3: the content. ---- */}
+      <div
+        className="relative flex h-full"
         style={{
           width: `${DECK.length * 100}%`,
           transform: `translate3d(-${(i * 100) / DECK.length}%, 0, 0)`,
@@ -94,7 +135,21 @@ export default function Deck() {
         }}
       >
         {DECK.map((slide, n) => (
-          <div key={n} className="relative h-full" style={{ width: `${100 / DECK.length}%` }}>
+          <div
+            key={n}
+            className="relative h-full"
+            style={{
+              width: `${100 / DECK.length}%`,
+              /* Inactive slides sit fractionally back and dimmed. With the
+                 three parallax layers this reads as real depth rather than
+                 a filmstrip scrolling past. */
+              transform: n === i ? 'scale(1)' : 'scale(.965)',
+              opacity: n === i ? 1 : 0.35,
+              transition: reduced
+                ? 'none'
+                : 'transform .85s cubic-bezier(.22,1,.36,1), opacity .6s ease',
+            }}
+          >
             <SlideView slide={slide} active={n === i} reduced={reduced} />
           </div>
         ))}
@@ -113,6 +168,18 @@ export default function Deck() {
         className="absolute inset-y-0 right-0 w-[18%] cursor-e-resize opacity-0"
         disabled={i === last}
       />
+
+      {/* Progress rail. A client should be able to see, at a glance, that
+          this is eight slides and not forty. */}
+      <div className="absolute inset-x-0 top-0 h-px bg-rule">
+        <div
+          className="h-full origin-left bg-gold"
+          style={{
+            transform: `scaleX(${(i + 1) / DECK.length})`,
+            transition: reduced ? 'none' : 'transform .85s cubic-bezier(.22,1,.36,1)',
+          }}
+        />
+      </div>
 
       {/* Wordmark, always present. */}
       <div className="pointer-events-none absolute left-[var(--pad)] top-8 flex flex-col gap-0.5 leading-none">
@@ -174,7 +241,7 @@ function SlideView({ slide, active, reduced }: { slide: Slide; active: boolean; 
   });
 
   return (
-    <div className="glow flex h-full w-full items-center px-[var(--pad)] py-24">
+    <div className="flex h-full w-full items-center px-[var(--pad)] py-24">
       <div className="mx-auto w-full max-w-shell">
         {slide.kind === 'cover' && (
           <>
@@ -214,8 +281,22 @@ function SlideView({ slide, active, reduced }: { slide: Slide; active: boolean; 
               {slide.figures.map((f, n) => (
                 <div key={f.label} style={anim(220 + n * 110)}>
                   <div className="font-display text-[clamp(2.4rem,5.5vw,4.4rem)] font-semibold leading-[.9] tracking-[-.03em]">
-                    {f.n}<span className="text-gold">{f.unit}</span>
+                    {/* Keyed on `active` so the count restarts each time the
+                        slide is reached — a deck gets navigated back and
+                        forth, and a number that only animates once feels
+                        broken the second time. */}
+                    {active
+                      ? <Counter key={`${f.label}-on`} value={Number(String(f.n).replace(/,/g, ''))} />
+                      : <span>0</span>}
+                    <span className="text-gold">{f.unit}</span>
                   </div>
+                  <div
+                    className="mt-5 h-px origin-left bg-gold/40"
+                    style={{
+                      transform: active ? 'scaleX(1)' : 'scaleX(0)',
+                      transition: reduced ? 'none' : `transform .9s cubic-bezier(.22,1,.36,1) ${420 + n * 110}ms`,
+                    }}
+                  />
                   <div className="mt-4 max-w-[18ch] text-[.8rem] leading-snug text-muted">{f.label}</div>
                 </div>
               ))}
@@ -232,6 +313,11 @@ function SlideView({ slide, active, reduced }: { slide: Slide; active: boolean; 
                 <div key={it.title} className="topline" style={anim(220 + n * 130)}>
                   <h3 className="text-[clamp(1.1rem,2vw,1.45rem)]">{it.title}</h3>
                   <p className="mt-3 text-[.92rem] text-muted">{it.body}</p>
+                  {it.meta && (
+                    <p className="mt-4 border-t border-rule pt-3 text-[.72rem] uppercase tracking-[.1em] text-[#5A6B82]">
+                      {it.meta}
+                    </p>
+                  )}
                 </div>
               ))}
             </div>
@@ -273,14 +359,58 @@ function SlideView({ slide, active, reduced }: { slide: Slide; active: boolean; 
                 </span>
               ))}
             </div>
-            <div className="quote max-w-[64ch]" style={anim(340)}>
-              <blockquote className="text-[clamp(1rem,1.7vw,1.3rem)] leading-relaxed">
-                {slide.quote.body}
-              </blockquote>
-              <div className="who">
-                <div className="name">{slide.quote.name}</div>
-                <div className="role">{slide.quote.role}</div>
+            <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
+              <div className="quote" style={anim(340)}>
+                <blockquote className="text-[clamp(.95rem,1.5vw,1.15rem)] leading-relaxed">
+                  {slide.quote.body}
+                </blockquote>
+                <div className="who">
+                  <div className="name">{slide.quote.name}</div>
+                  <div className="role">{slide.quote.role}</div>
+                </div>
               </div>
+              {slide.secondQuote && (
+                <div className="quote" style={anim(440)}>
+                  <blockquote className="text-[clamp(.95rem,1.5vw,1.15rem)] leading-relaxed">
+                    {slide.secondQuote.body}
+                  </blockquote>
+                  <div className="who">
+                    <div className="name">{slide.secondQuote.name}</div>
+                    <div className="role">{slide.secondQuote.role}</div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+
+        {slide.kind === 'segments' && (
+          <>
+            <div className="kick" style={anim(0)}>{slide.eyebrow}</div>
+            <h2 className="mb-3 text-[clamp(1.8rem,4.4vw,3.4rem)]" style={anim(110)}>{slide.heading}</h2>
+            <p className="sub mb-10" style={anim(170)}>{slide.sub}</p>
+            <div className="grid gap-x-10 gap-y-7 md:grid-cols-2">
+              {slide.groups.map((g, n) => (
+                <div key={g.title} className="border-t border-rule pt-4" style={anim(260 + n * 100)}>
+                  <h3 className="text-[clamp(1rem,1.7vw,1.2rem)] text-gold">{g.title}</h3>
+                  <p className="mt-2 text-[.84rem] leading-relaxed text-muted">{g.roles}</p>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+
+        {slide.kind === 'why' && (
+          <>
+            <div className="kick" style={anim(0)}>{slide.eyebrow}</div>
+            <h2 className="mb-12 text-[clamp(1.8rem,4.4vw,3.4rem)]" style={anim(110)}>{slide.heading}</h2>
+            <div className="grid gap-x-10 gap-y-9 md:grid-cols-2">
+              {slide.points.map((pt, n) => (
+                <div key={pt.title} className="topline" style={anim(230 + n * 110)}>
+                  <h3 className="text-[clamp(1.05rem,1.9vw,1.3rem)]">{pt.title}</h3>
+                  <p className="mt-3 text-[.92rem] text-muted">{pt.body}</p>
+                </div>
+              ))}
             </div>
           </>
         )}
