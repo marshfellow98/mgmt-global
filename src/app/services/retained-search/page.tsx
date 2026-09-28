@@ -96,7 +96,7 @@ export default function RetainedSearch() {
 
       <PinnedSection
         kick="How it works · Retained search in four steps"
-        heading={<><Line>A search process you</Line><Line><>can <em className="accent">actually understand.</em></></Line></>}
+        heading={<><Line>A search process you</Line><Line><>can <em className="accent">actually follow.</em></></Line></>}
         steps={PROCESS_STEPS}
       >
         {/* Phase two: the 3D interior. PathDiagram is one line away if this

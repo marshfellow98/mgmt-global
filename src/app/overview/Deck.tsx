@@ -35,6 +35,7 @@ import Counter from '@/components/Counter';
 export default function Deck() {
   const [i, setI] = useState(0);
   const [reduced, setReduced] = useState(false);
+  const [logoFailed, setLogoFailed] = useState(false);
   const touchX = useRef<number | null>(null);
   const last = DECK.length - 1;
 
@@ -107,7 +108,9 @@ export default function Deck() {
            between the light and the content — the middle distance. ---- */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 flex items-center justify-end overflow-hidden pr-[3vw]"
+        /* Pushed up and further right: at centre it sat behind body copy on
+           the denser slides and made both hard to read. */
+        className="pointer-events-none absolute inset-x-0 top-0 flex h-[62%] items-center justify-end overflow-hidden pr-[2vw]"
         style={{
           transform: `translate3d(-${(i * 60) / DECK.length}%, 0, 0)`,
           transition: reduced ? 'none' : 'transform 1s cubic-bezier(.22,1,.36,1)',
@@ -116,8 +119,8 @@ export default function Deck() {
         <span
           className="select-none font-display font-semibold leading-none transition-opacity duration-700"
           style={{
-            fontSize: 'clamp(16rem, 42vw, 40rem)',
-            color: 'rgba(225,161,63,.035)',
+            fontSize: 'clamp(12rem, 32vw, 30rem)',
+            color: 'rgba(225,161,63,.028)',
             letterSpacing: '-0.06em',
           }}
         >
@@ -159,13 +162,13 @@ export default function Deck() {
       <button
         aria-label="Previous slide"
         onClick={() => go(i - 1)}
-        className="absolute inset-y-0 left-0 w-[18%] cursor-w-resize opacity-0"
+        className="absolute inset-y-0 left-0 hidden w-[18%] cursor-w-resize opacity-0 sm:block"
         disabled={i === 0}
       />
       <button
         aria-label="Next slide"
         onClick={() => go(i + 1)}
-        className="absolute inset-y-0 right-0 w-[18%] cursor-e-resize opacity-0"
+        className="absolute inset-y-0 right-0 hidden w-[18%] cursor-e-resize opacity-0 sm:block"
         disabled={i === last}
       />
 
@@ -181,12 +184,24 @@ export default function Deck() {
         />
       </div>
 
-      {/* Wordmark, always present. */}
-      <div className="pointer-events-none absolute left-[var(--pad)] top-8 flex flex-col gap-0.5 leading-none">
-        <span className="font-display text-[1.15rem] font-semibold text-white">MGMT</span>
-        <span className="text-[.45rem] font-medium uppercase tracking-[.34em] text-[#9AA4AF]">
-          Global Consulting
-        </span>
+      {/* The real logo. Falls back to the text wordmark if the file is
+          missing, same pattern as the site nav. */}
+      <div className="pointer-events-none absolute left-[var(--pad)] top-7">
+        {logoFailed ? (
+          <span className="flex flex-col gap-0.5 leading-none">
+            <span className="font-display text-[1.15rem] font-semibold text-white">MGMT</span>
+            <span className="text-[.45rem] font-medium uppercase tracking-[.34em] text-[#9AA4AF]">
+              Global Consulting
+            </span>
+          </span>
+        ) : (
+          <img
+            src="/logo.svg"
+            alt="MGMTGlobal"
+            style={{ height: 34, width: 'auto' }}
+            onError={() => setLogoFailed(true)}
+          />
+        )}
       </div>
 
       {/* Slide counter */}
@@ -237,11 +252,14 @@ function SlideView({ slide, active, reduced }: { slide: Slide; active: boolean; 
   const anim = (delay: number) => ({
     opacity: active ? 1 : 0,
     transform: active ? 'none' : 'translateY(18px)',
-    transition: reduced ? 'none' : `opacity .7s ease ${delay}ms, transform .7s cubic-bezier(.22,1,.36,1) ${delay}ms`,
+    transition: reduced ? 'none' : `opacity 1.1s ease ${delay}ms, transform 1.1s cubic-bezier(.22,1,.36,1) ${delay}ms`,
   });
 
   return (
-    <div className="flex h-full w-full items-center px-[var(--pad)] py-24">
+    /* Bottom padding clears the dot navigation and the hint beneath it.
+       A flat py-24 left the denser slides — segments, proof, close — running
+       underneath the indicators. */
+    <div className="flex h-full w-full items-center overflow-y-auto px-[var(--pad)] pb-44 pt-24 sm:pb-40 sm:pt-28">
       <div className="mx-auto w-full max-w-shell">
         {slide.kind === 'cover' && (
           <>

@@ -21,6 +21,7 @@ export const metadata: Metadata = {
 };
 
 const MODES = [
+  { title: 'Due Diligence', body: 'The people side of a transaction examined before it closes — leadership capability, key relationships, and the retention risk nobody has priced in.' },
   { title: 'Acquisitions', body: 'Supporting leadership integration, talent retention, and organizational restructuring following acquisitions.' },
   { title: 'Lift-outs', body: 'Recruiting entire teams or specialized business units while ensuring continuity and minimal disruption.' },
   { title: 'Fold-ins', body: 'Supporting the successful integration of acquired teams into existing organizational structures.' },

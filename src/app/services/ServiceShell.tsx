@@ -30,7 +30,7 @@ export default function ServiceShell({
                 <Link
                   key={s.slug}
                   href={`/services/${s.slug}`}
-                  className={`border px-[1.15rem] py-3 text-[.7rem] font-semibold uppercase tracking-[.14em] transition-colors ${
+                  className={`rounded-md border px-[1.15rem] py-3 text-[.7rem] font-semibold uppercase tracking-[.14em] transition-colors ${
                     on
                       ? 'border-gold bg-gold text-ink'
                       : 'border-rule text-[#9AA4AF] hover:border-gold hover:text-gold'

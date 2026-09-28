@@ -11,7 +11,7 @@ export default function CloseBand() {
           <Line><>to leave to <em className="accent">chance.</em></></Line>
         </h2>
         <p className="fade d2 mx-auto mb-11 max-w-[44ch] text-muted">
-          Thirty minutes, completely confidential, and you talk directly with our team.
+          Thirty minutes, and you talk directly with our team.
         </p>
         <Magnetic href="/contact" className="btn fade d3">
           Book a Consultation <span className="arw">&rarr;</span>

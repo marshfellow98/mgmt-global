@@ -142,8 +142,8 @@ export default function Home() {
           <div>
             <div className="kick fade">Who we are</div>
             <h2 className="display">
-              <Line>A recruiting firm</Line>
-              <Line><>and a <em className="accent">growth partner.</em></></Line>
+              <Line>Not just a search firm.</Line>
+              <Line><>A <em className="accent">growth partner.</em></></Line>
             </h2>
             <p className="fade d2">Most search firms cover every industry and know none of them deeply.</p>
             <p className="fade d2">
@@ -182,7 +182,7 @@ export default function Home() {
           <div className="kick fade">How it works</div>
           <h2 className="display mb-12">
             <Line>A search process you</Line>
-            <Line><>can <em className="accent">actually understand.</em></></Line>
+            <Line><>can <em className="accent">actually follow.</em></></Line>
           </h2>
           <div className="grid gap-9 md:grid-cols-2 lg:grid-cols-4">
             {PROCESS_STEPS.map((s, i) => (

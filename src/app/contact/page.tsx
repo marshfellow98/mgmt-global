@@ -42,7 +42,7 @@ export default function Contact() {
             <Line>Let’s start a</Line><Line><em className="accent">conversation.</em></Line>
           </h1>
           <p className="sub fade d2">
-            Thirty minutes, completely confidential, and you talk directly with our team.
+            Thirty minutes, and you talk directly with our team.
           </p>
         </div>
       </Reveal>

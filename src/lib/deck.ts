@@ -54,7 +54,7 @@ export const DECK: Slide[] = [
   {
     kind: 'statement',
     eyebrow: 'Our position',
-    lines: ['We chose', 'the opposite.'],
+    lines: ['Not just a search firm.', 'A growth partner.'],
     sub: 'MGMTGlobal works only in insurance, and has since 2000. That focus is the whole advantage: we already know the players, the books, and the moves before a search starts. No ramp-up on your time, no learning your market while billing for it.',
   },
   {
@@ -74,7 +74,7 @@ export const DECK: Slide[] = [
     eyebrow: 'The record',
     heading: 'Twenty-five years in one market.',
     figures: [
-      { n: '1,200', unit: '+', label: 'Producers hired for key clients' },
+      { n: '1,500', unit: '+', label: 'Producers hired for key clients' },
       { n: '50', unit: '+', label: 'Years combined search experience' },
       { n: '25', unit: 'yr', label: 'Proprietary talent database' },
       { n: '100', unit: '%', label: 'Insurance, no other industries' },
@@ -102,7 +102,7 @@ export const DECK: Slide[] = [
     heading: 'Four steps, no mystery.',
     steps: [
       { n: '01', title: 'We learn your business', body: 'Your company, your culture, and what success in the role actually looks like.' },
-      { n: '02', title: 'We go to the market, quietly', body: 'High performers who aren’t looking, approached with discretion.' },
+      { n: '02', title: 'We go to the market, quietly', body: 'High performers — looking or not — approached with discretion.' },
       { n: '03', title: 'We hand you a shortlist', body: 'Three or four finalists, fully evaluated. Not a pile of résumés.' },
       { n: '04', title: 'We stay in it to the close', body: 'Interviews, negotiation, and the right person across the line.' },
     ],
@@ -139,7 +139,7 @@ export const DECK: Slide[] = [
     kind: 'close',
     eyebrow: 'Next step',
     lines: ['A hire too important', 'to leave to chance.'],
-    sub: 'Thirty minutes, completely confidential, and you talk directly with Shane.',
+    sub: 'Thirty minutes, and you talk directly with Shane.',
     cta: 'Book a consultation',
     href: 'https://calendly.com/lsg-mgmt/brief-consultation-sg',
   },

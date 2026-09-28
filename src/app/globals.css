@@ -121,8 +121,11 @@ p:last-child { margin-bottom: 0; }
    the equal negative margin.
    ============================================================ */
 .rv { display: block; overflow: hidden; padding-bottom: .14em; margin-bottom: -.14em; }
-.rv > * { display: block; transition: transform .95s cubic-bezier(.22,1,.36,1); }
-.fade { transition: opacity .8s ease, transform .8s cubic-bezier(.22,1,.36,1); }
+/* 1.5s rather than .95s. The rise was fast enough that most readers never
+   registered it as motion — it just appeared. Slower is noticeable without
+   being something you wait for. */
+.rv > * { display: block; transition: transform 1.5s cubic-bezier(.22,1,.36,1); }
+.fade { transition: opacity 1.15s ease, transform 1.15s cubic-bezier(.22,1,.36,1); }
 
 /* IMPORTANT: content is visible by default. The hidden starting state only
    applies under html.js, which a tiny inline script in layout.tsx adds. If
@@ -133,8 +136,8 @@ html.js .rv > * { transform: translateY(115%); }
 html.js .fade { opacity: 0; transform: translateY(16px); }
 html.js .is-on .rv > * { transform: translateY(0); }
 html.js .is-on .fade { opacity: 1; transform: none; }
-.d1 { transition-delay: .08s; } .d2 { transition-delay: .16s; }
-.d3 { transition-delay: .26s; } .d4 { transition-delay: .36s; }
+.d1 { transition-delay: .12s; } .d2 { transition-delay: .26s; }
+.d3 { transition-delay: .42s; } .d4 { transition-delay: .58s; }
 
 @media (prefers-reduced-motion: reduce) {
   .rv > *, .fade { transform: none !important; opacity: 1 !important; transition: none !important; }
@@ -146,6 +149,7 @@ html.js .is-on .fade { opacity: 1; transform: none; }
 .btn {
   display: inline-flex; align-items: center; gap: .7rem;
   padding: 1.05rem 1.7rem;
+  border-radius: 6px;
   font-family: var(--font-sans), sans-serif;
   font-weight: 600; font-size: .76rem; letter-spacing: .14em; text-transform: uppercase;
   border: 1px solid var(--gold); color: var(--ink); background: var(--gold);
@@ -253,8 +257,8 @@ html.js .is-on .fade { opacity: 1; transform: none; }
   padding: 0 var(--pad) clamp(1.5rem, 4vh, 2.5rem);
   max-width: var(--shell); margin: 0 auto; width: 100%;
 }
-.tick { flex: 1; height: 2px; background: var(--rule); position: relative; overflow: hidden; }
-.tick i { position: absolute; inset: 0; background: var(--gold); transform: scaleX(0); transform-origin: left; transition: transform .2s linear; }
+.tick { flex: 1; height: 2px; border-radius: 2px; background: var(--rule); position: relative; overflow: hidden; }
+.tick i { position: absolute; inset: 0; border-radius: 2px; background: var(--gold); transform: scaleX(0); transform-origin: left; transition: transform .2s linear; }
 
 
 /* Page transition. See template.tsx. */
@@ -322,6 +326,7 @@ html.js .is-on .fade { opacity: 1; transform: none; }
 
 .glass {
   position: relative;
+  border-radius: 10px;
   background: linear-gradient(
     160deg,
     rgba(255,255,255,.11) 0%,
@@ -390,6 +395,7 @@ html.js .is-on .fade { opacity: 1; transform: none; }
 /* ============================================================
    Marquee
    ============================================================ */
+/* Soft corners throughout — see the .btn rule for the base radius. */
 .marq { border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); padding: 1.9rem 0; overflow: hidden; background: var(--char); }
 .marq-track { display: flex; gap: 4.5rem; width: max-content; animation: slide 44s linear infinite; }
 .marq:hover .marq-track { animation-play-state: paused; }
@@ -404,6 +410,7 @@ html.js .is-on .fade { opacity: 1; transform: none; }
 .scard {
   position: sticky;
   contain: paint;
+  border-radius: 10px;
   background: var(--char2); border: 1px solid var(--rule);
   padding: clamp(1.8rem, 4vw, 3.4rem); margin-bottom: 1.4rem;
   display: grid; gap: 1.6rem; grid-template-columns: 1fr;
@@ -451,16 +458,25 @@ html.js .is-on .fade { opacity: 1; transform: none; }
    ============================================================ */
 .rows { border-top: 1px solid var(--rule); }
 .hrow {
-  display: flex; align-items: center; justify-content: space-between; gap: 2rem;
+  /* Stacked on mobile. The row was flex with space-between at every width,
+     so on a phone the title, the meta and the apply link were fighting for
+     one line and overlapping. */
+  display: flex; flex-direction: column; align-items: flex-start; gap: .75rem;
   padding: clamp(1.5rem, 3.5vw, 2.4rem) 0; border-bottom: 1px solid var(--rule);
   position: relative; transition: padding-left .4s cubic-bezier(.22,1,.36,1);
+}
+@media (min-width: 760px) {
+  .hrow { flex-direction: row; align-items: center; justify-content: space-between; gap: 2rem; }
 }
 .hrow:hover { padding-left: 1.4rem; }
 .hrow::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: var(--gold); transform: scaleY(0); transition: transform .4s cubic-bezier(.22,1,.36,1); }
 .hrow:hover::before { transform: scaleY(1); }
 .hrow h4 { font-family: var(--font-display), serif; font-size: clamp(1.15rem, 2.6vw, 1.75rem); transition: color .3s; }
 .hrow:hover h4 { color: var(--gold); }
-.hrow .meta { font-size: .76rem; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+/* nowrap is right on a wide row and wrong on a narrow one, where a long
+   location would overflow the card. */
+.hrow .meta { font-size: .76rem; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+@media (min-width: 760px) { .hrow .meta { white-space: nowrap; } }
 
 /* ============================================================================
    Process ledger (service pages)
@@ -506,6 +522,7 @@ html.js .is-on .fade { opacity: 1; transform: none; }
 @media (min-width: 1024px) { .hero-media { will-change: transform; } }
 
 .ph {
+  border-radius: 8px;
   background: repeating-linear-gradient(45deg, #0D131B 0 10px, #101823 10px 20px);
   border: 1px solid var(--rule);
   display: flex; align-items: center; justify-content: center;
@@ -513,6 +530,51 @@ html.js .is-on .fade { opacity: 1; transform: none; }
   text-align: center; padding: 1rem;
 }
 
-.field { width: 100%; background: var(--char); border: 1px solid var(--rule); color: #fff; padding: .9rem; font-family: inherit; font-size: .95rem; }
+.field { width: 100%; border-radius: 6px; background: var(--char); border: 1px solid var(--rule); color: #fff; padding: .9rem; font-family: inherit; font-size: .95rem; }
 .field:focus { outline: none; border-color: var(--gold); }
 .field-label { display: block; font-size: .64rem; letter-spacing: .18em; text-transform: uppercase; color: var(--gold); font-weight: 600; margin-bottom: .5rem; }
+
+/* ============================================================================
+   Mobile pass
+
+   Found by walking every page at 390px. Each of these was a real collision
+   or an overflow, not a preference.
+   ============================================================================ */
+@media (max-width: 759px) {
+  /* Display type was sized for a laptop and ran to five or six lines on a
+     phone, pushing everything below the fold. */
+  .display     { font-size: clamp(1.7rem, 8.5vw, 2.4rem); }
+  .display-lg  { font-size: clamp(2rem, 10vw, 2.9rem); line-height: 1.06; }
+  .close h2    { font-size: clamp(1.9rem, 9.5vw, 2.6rem); }
+
+  /* Page headers reserved desktop-sized breathing room. */
+  .phead { padding-top: calc(var(--navh) + 2.25rem); padding-bottom: 2.5rem; }
+
+  /* Quotes: the left border plus padding ate a third of a 390px screen. */
+  .quote { padding-left: 1.1rem; }
+  .quote blockquote { font-size: .95rem; }
+
+  /* Sticky cards stop sticking — three stacked panels on a short screen
+     means the last one never reaches its position. */
+  .scard { position: static; margin-bottom: 1rem; }
+
+  /* The marquee ran at desktop speed, which is far too fast across a
+     narrow viewport. */
+  .marq-track { animation-duration: 28s; gap: 2.6rem; }
+  .marq { padding: 1.4rem 0; }
+
+  /* Figures: two columns of large numerals were overflowing. */
+  .fig .n { font-size: clamp(2rem, 11vw, 2.8rem); }
+
+  /* Footer columns stacked but kept their desktop gap. */
+  .f-top { gap: 2rem; }
+
+  /* Form fields were comfortably tappable but the labels crowded them. */
+  .field { padding: .95rem; }
+}
+
+/* iOS zooms the page when a focused input is under 16px. Nothing else
+   triggers it and it's disorienting mid-form. */
+@media (max-width: 1023px) {
+  .field, .news input { font-size: 16px; }
+}

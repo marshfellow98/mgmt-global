@@ -38,7 +38,7 @@ DOCS = [
                      "actually looks like. We align on the mandate before approaching anyone."),
                     ("02", "We go to the market, quietly",
                      "We map the relevant companies and talent pools, then approach high "
-                     "performers who are employed and would never answer a job posting."),
+                     "performers — looking or not — with discretion."),
                     ("03", "We hand you a shortlist, not a pile",
                      "Three or four finalists, assessed on track record, trajectory, role fit "
                      "and motivation — with the context to evaluate them properly."),

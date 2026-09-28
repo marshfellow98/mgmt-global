@@ -120,7 +120,7 @@ export default function ProcessLedger({
   return (
     <div
       ref={ref}
-      className="ledger sticky top-[calc(var(--navh)+2rem)] flex h-[clamp(420px,72vh,640px)] w-full flex-col overflow-hidden border border-rule bg-char2"
+      className="ledger sticky top-[calc(var(--navh)+2rem)] flex h-[clamp(420px,72vh,640px)] w-full flex-col overflow-hidden rounded-[10px] border border-rule bg-char2"
     >
       {/* The one flourish: a large word, barely there. */}
       <div

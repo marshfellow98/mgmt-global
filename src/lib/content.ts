@@ -17,7 +17,7 @@ export const CONTACT = {
 };
 
 export const STATS = [
-  { n: 1200, unit: '+',  label: 'Producers hired for key clients' },
+  { n: 1500, unit: '+',  label: 'Producers hired for key clients' },
   { n: 50,   unit: '+',  label: 'Years combined search experience' },
   { n: 25,   unit: 'yr', label: 'Proprietary talent database' },
   { n: 100,  unit: '%',  label: 'Insurance, no other industries' },
@@ -56,7 +56,7 @@ export const PROCESS_STEPS = [
   { n: 'Step 01', title: 'We learn your business.',
     body: 'Before we look at a single candidate, we understand your company, your culture, and what success in this role really looks like.' },
   { n: 'Step 02', title: 'We go to the market, quietly.',
-    body: 'We tap our network and 25-year database to find high performers who aren’t looking, then approach them with discretion.' },
+    body: 'We tap our network and 25-year database to find high performers — looking or not — and approach them with discretion.' },
   { n: 'Step 03', title: 'We hand you a shortlist, not a pile.',
     body: 'Three or four finalists, fully evaluated on track record, fit, and ambition.' },
   { n: 'Step 04', title: 'We stay in it to the close.',
@@ -87,7 +87,7 @@ export const RETAINED_LEDGER = {
   watermark: 'Search',
   items: [
     { n: '01', title: 'Brief',     detail: 'Your company, your culture, what success looks like.' },
-    { n: '02', title: 'Market',    detail: 'Quiet outreach to people who aren’t looking.' },
+    { n: '02', title: 'Market',    detail: 'Quiet outreach — to people looking or not.' },
     { n: '03', title: 'Shortlist', detail: 'Three or four finalists, fully evaluated.' },
     { n: '04', title: 'Close',     detail: 'Interviews, negotiation, the signature.' },
   ],
@@ -107,10 +107,11 @@ export const MA_LEDGER = {
   kick: 'Before, during, and after',
   watermark: 'Merge',
   items: [
-    { n: '01', title: 'Assess',  detail: 'Leadership, honestly evaluated.' },
-    { n: '02', title: 'Align',   detail: 'The organization around the deal.' },
-    { n: '03', title: 'Retain',  detail: 'The people the deal was for.' },
-    { n: '04', title: 'Recruit', detail: 'Whoever the new shape still needs.' },
+    { n: '01', title: 'Diligence', detail: 'The people side of the deal, examined before it closes.' },
+    { n: '02', title: 'Assess',  detail: 'Leadership, honestly evaluated.' },
+    { n: '03', title: 'Align',   detail: 'The organization around the deal.' },
+    { n: '04', title: 'Retain',  detail: 'The people the deal was for.' },
+    { n: '05', title: 'Recruit', detail: 'Whoever the new shape still needs.' },
   ],
 };
 
