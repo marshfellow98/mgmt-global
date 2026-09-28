@@ -66,7 +66,9 @@ export default function MAConsulting() {
               right roles before, during, and after organizational change.
             </p>
             <p className="fade d3 mt-8">
-              <a className="lnk" href="#">Download the overview (PDF) <span>&rarr;</span></a>
+              <a className="lnk" href="/downloads/mgmtglobal-ma-consulting.pdf" download>
+                Download the overview (PDF) <span>&rarr;</span>
+              </a>
             </p>
           </div>
           {/* Taller than the panel inside it: that extra height is the

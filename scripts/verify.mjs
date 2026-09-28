@@ -151,5 +151,33 @@ const ok  = (m) => console.log('  ok   ' + m);
   else ok(`deck: ${slides} slides, ${amb} ambience entries`);
 }
 
+// ---------- 10. No dependencies on the old staging server ----------
+{
+  const walk = (dir) => readdirSync(dir, { withFileTypes: true }).flatMap((e) =>
+    e.isDirectory() ? walk(join(dir, e.name)) : [join(dir, e.name)]);
+  const files = walk('src').filter((f) => /\.(tsx?|css)$/.test(f));
+  let found = 0;
+  for (const f of files) {
+    if (readFileSync(f, 'utf8').includes('zktech.dz')) { bad(`${f}: still loads from the old staging server`); found++; }
+  }
+  if (!found) ok('no assets load from the old staging server');
+}
+
+// ---------- 11. Download links point at files that exist ----------
+{
+  const walk = (dir) => readdirSync(dir, { withFileTypes: true }).flatMap((e) =>
+    e.isDirectory() ? walk(join(dir, e.name)) : [join(dir, e.name)]);
+  const files = walk('src/app').filter((f) => f.endsWith('.tsx'));
+  let n = 0;
+  for (const f of files) {
+    for (const m of readFileSync(f, 'utf8').matchAll(/href="(\/(?:downloads|video|images)\/[^"]+)"/g)) {
+      const target = 'public' + m[1];
+      if (!existsSync(target)) bad(`${f}: links to ${m[1]} which doesn't exist`);
+      else n++;
+    }
+  }
+  ok(`${n} asset links resolve`);
+}
+
 console.log(fail ? `\n${fail} problem(s) found.` : '\nAll checks passed.');
 process.exit(fail ? 1 : 0);

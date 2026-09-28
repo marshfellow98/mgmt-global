@@ -65,7 +65,9 @@ export default function ContingentSubmittal() {
             </p>
             <p className="fade d3 font-medium text-white">You pay only on a successful placement.</p>
             <p className="fade d3 mt-8">
-              <a className="lnk" href="#">Download the overview (PDF) <span>&rarr;</span></a>
+              <a className="lnk" href="/downloads/mgmtglobal-contingent-submittal.pdf" download>
+                Download the overview (PDF) <span>&rarr;</span>
+              </a>
             </p>
           </div>
           {/* Taller than the panel inside it: that extra height is the

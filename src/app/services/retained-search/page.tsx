@@ -68,8 +68,9 @@ export default function RetainedSearch() {
               long-term success.
             </p>
             <p className="fade d3 mt-8">
-              {/* TODO: point at /retained-search-overview.pdf once the file arrives */}
-              <a className="lnk" href="#">Download the overview (PDF) <span>&rarr;</span></a>
+              <a className="lnk" href="/downloads/mgmtglobal-retained-search.pdf" download>
+                Download the overview (PDF) <span>&rarr;</span>
+              </a>
             </p>
           </div>
           {/* Taller than the panel inside it: that extra height is the

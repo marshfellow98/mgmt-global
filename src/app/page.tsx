@@ -13,10 +13,12 @@ import SegmentRail from '@/components/SegmentRail';
 import CloseBand from '@/components/CloseBand';
 import { STATS, PROCESS_STEPS, WHY, QUOTES } from '@/lib/content';
 
-/* Hosted on the previous developer's staging server for now. Move to
-   /public and swap these paths once the uploads zip arrives. */
-const HERO_VIDEO = 'https://zktech.dz/MGMT/wp-content/uploads/2026/07/Hero-Video.mp4#t=0,9';
-const HERO_POSTER = 'https://zktech.dz/MGMT/wp-content/uploads/2026/07/Hero-Home.webp';
+/* Local. These used to load from the previous developer's staging server,
+   which meant the homepage hero depended on a machine nobody here controls.
+   Poster frame extracted from the video itself, so the still and the first
+   frame match. */
+const HERO_VIDEO = '/video/hero.mp4';
+const HERO_POSTER = '/images/hero-poster.jpg';
 
 export default function Home() {
   return (
