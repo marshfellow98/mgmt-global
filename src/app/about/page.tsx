@@ -3,11 +3,11 @@ import Image from 'next/image';
 import Reveal from '@/components/Reveal';
 import Line from '@/components/Line';
 import PinnedSection from '@/components/PinnedSection';
-import PathDiagram from '@/components/PathDiagram';
+import DallasSkyline from '@/components/DallasSkyline';
 import SegmentRail from '@/components/SegmentRail';
 import CloseBand from '@/components/CloseBand';
 import { JsonLd, personSchema, breadcrumbSchema } from '@/lib/schema';
-import { ADVANTAGE_STEPS, ADVANTAGE_PATH, ADVANTAGE_WAYPOINTS, VALUES, QUOTES } from '@/lib/content';
+import { ADVANTAGE_STEPS, VALUES, QUOTES } from '@/lib/content';
 
 export const metadata: Metadata = {
   title: 'About MGMTGlobal | Insurance Executive Search Since 2000',
@@ -97,8 +97,9 @@ export default function About() {
         kick="The advantage · One industry, twenty-five years"
         heading={<><Line>Depth you can’t build</Line><Line><>after the <em className="accent">search starts.</em></></Line></>}
         steps={ADVANTAGE_STEPS}
+        wide
       >
-        <PathDiagram path={ADVANTAGE_PATH} waypoints={ADVANTAGE_WAYPOINTS} />
+        <DallasSkyline />
       </PinnedSection>
 
       <section className="bg-char py-[clamp(4rem,10vw,9rem)]">

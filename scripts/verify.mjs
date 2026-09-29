@@ -66,7 +66,7 @@ const ok  = (m) => console.log('  ok   ' + m);
     e.isDirectory() ? walk(join(dir, e.name)) : [join(dir, e.name)]);
   for (const f of walk('src/app').filter((x) => x.endsWith('page.tsx'))) {
     const s = readFileSync(f, 'utf8');
-    if (s.includes('<PinnedSection') && !/(Globe|PathDiagram)/.test(s))
+    if (s.includes('<PinnedSection') && !/(Globe|PathDiagram|DallasSkyline)/.test(s))
       bad(`${f}: PinnedSection with no interior component`);
   }
   ok('pinned sections have interiors');
@@ -205,6 +205,21 @@ const ok  = (m) => console.log('  ok   ' + m);
     }
   }
   ok(`${seen.size} form endpoints have routes`);
+}
+
+// ---------- 14. Skyline arcs close properly ----------
+{
+  /* Two arcs only form a circle when the radius is exactly half the span.
+     Reunion Tower's sphere rendered as a pointed lens until this was
+     right. */
+  const src = readFileSync('src/components/DallasSkyline.tsx', 'utf8');
+  const arcs = [...src.matchAll(/a(\d+) \1 0 0 1 (-?)(\d+) 0/g)];
+  let bad_ = 0;
+  for (const m of arcs) {
+    const r = Number(m[1]), span = Number(m[3]);
+    if (Math.abs(span - r * 2) > 0.5) { bad(`skyline arc r=${r} span=${span} — won't close into a circle`); bad_++; }
+  }
+  if (!bad_) ok(`skyline: ${arcs.length} arcs close correctly`);
 }
 
 console.log(fail ? `\n${fail} problem(s) found.` : '\nAll checks passed.');

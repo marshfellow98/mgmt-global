@@ -412,3 +412,50 @@ rather than a feed. `verify.mjs` fails the build if the status changes from
 
 The brief is the `SYSTEM` constant. Plain English. The list of sections it
 searches for is there too.
+
+### Newsletter email template
+
+`jobs/email-template.ts` renders the digest as branded HTML.
+
+**Email HTML is not web HTML.** No web fonts (Outlook and Gmail's app ignore
+`@font-face`), so Georgia and a system sans stack stand in for Source Serif
+and Schibsted Grotesk — same serif/sans pairing, same proportions, which is
+what actually reads as the brand. Tables and inline styles only; Outlook
+renders through Word's engine.
+
+Dark masthead, light body. A fully dark email is a deliverability risk and
+some clients invert it.
+
+**Two bugs worth not reintroducing:**
+
+The model's preamble was leaking into the sent email as a subtitle. Fixed by
+prefilling the assistant turn with `# `, so the response begins mid-heading
+and physically cannot open with "Here's the digest…". There's a second guard
+that strips anything before the first heading.
+
+The Markdown converter originally treated every source line as a paragraph,
+which broke wrapped sentences into fragments. It now buffers lines and
+flushes at blank lines and block elements.
+
+`email_type: 'premium'` on the Buttondown call tells it the body is finished
+HTML — without it, Buttondown wraps the markup in its own template and the
+branding is lost.
+
+### About page: the Dallas skyline
+
+`DallasSkyline.tsx` is the About page's pinned interior, replacing an
+abstract four-node path that left most of the frame empty.
+
+Draws left to right as you scroll — each building gets a slice of the scroll
+based on its x position, so a pen appears to track across the page. Technique
+borrowed from hgrellc.com (stroke-dashoffset reveal), but driven by scroll
+rather than a load animation.
+
+Landmarks are recognisable rather than literal: Reunion Tower, Fountain
+Place's wedge, the Bank of America Plaza slab, Renaissance Tower's masts.
+Gold marks the landmarks, grey the filler.
+
+Two things not to break: the sphere's arcs need `r` to be exactly half the
+span or they meet at points and read as a lens (verify.mjs checks this), and
+the section passes `wide` to PinnedSection — a skyline needs the full column,
+not the square box the globe uses.

@@ -212,6 +212,12 @@ html.js .is-on .fade { opacity: 1; transform: none; }
 .step h3 { font-size: clamp(1.5rem, 3.4vw, 2.4rem); margin-bottom: 1rem; line-height: 1.12; }
 .step p { font-size: clamp(.95rem, 1.5vw, 1.05rem); max-width: 40ch; margin: 0; }
 
+/* The skyline is a wide drawing, not a square diagram — it needs the full
+   column width rather than a 1:1 box. Scoped to the About page's section so
+   the globe on retained-search keeps its own sizing. */
+.viz-wide { position: relative; width: 100%; align-self: center; }
+.viz-wide svg { width: 100%; height: auto; display: block; }
+
 /* Sized from its own grid cell, not from viewport fractions.
    The earlier version guessed at vh while the heading, the progress bars and
    the padding were all drawing from that same budget — on a short window it

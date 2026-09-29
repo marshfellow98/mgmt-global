@@ -56,11 +56,13 @@ type Props = {
   heading: ReactNode;
   steps: { n: string; title: string; body: string }[];
   children: ReactNode;
+  /** Wide interiors (the skyline) need the full column, not a square box. */
+  wide?: boolean;
 };
 
 const EASE = 0.14;
 
-export default function PinnedSection({ kick, heading, steps, children }: Props) {
+export default function PinnedSection({ kick, heading, steps, children, wide = false }: Props) {
   const sectionRef = useRef<HTMLElement>(null);
   const subscribers = useRef<Set<RenderFn>>(new Set());
   const shownRef = useRef(0);
@@ -186,7 +188,7 @@ export default function PinnedSection({ kick, heading, steps, children }: Props)
               ))}
             </div>
 
-            <div className="viz">{children}</div>
+            <div className={wide ? 'viz-wide' : 'viz'}>{children}</div>
           </div>
 
           <div className="ticks">

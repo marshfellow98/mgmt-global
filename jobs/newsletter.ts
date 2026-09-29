@@ -25,6 +25,7 @@
 
 import Anthropic from '@anthropic-ai/sdk';
 import { getOpenJobs } from '../src/lib/recruiterflow';
+import { renderEmail } from './email-template';
 
 const now = new Date();
 const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
@@ -148,13 +149,26 @@ End the digest with exactly this footer:
 
 ${footerBlock}`,
       },
+      /* Prefilling the assistant turn with "# " forces the response to begin
+         mid-headline. The model physically cannot open with "Here's the
+         digest for..." because it's already inside an H1 — which is what
+         was leaking through as a subtitle in the sent email. */
+      { role: 'assistant', content: '# ' },
     ],
   });
 
-  const text = message.content
+  const raw = message.content
     .map((b) => (b.type === 'text' ? b.text : ''))
     .join('')
     .trim();
+
+  /* The prefill means the response continues from "# ", so put it back.
+     Then drop anything before the first heading as a safety net — if a
+     preamble ever slips past the prefill, it should never reach a
+     subscriber. */
+  let text = raw.startsWith('#') ? raw : `# ${raw}`;
+  const firstHeading = text.indexOf('# ');
+  if (firstHeading > 0) text = text.slice(firstHeading);
 
   const searches = message.content.filter(
     (b) => (b as { type: string }).type === 'server_tool_use'
@@ -167,15 +181,23 @@ ${footerBlock}`,
    Save as a draft in Buttondown
    --------------------------------------------------------------------------- */
 
-async function saveDraft(subject: string, body: string) {
+async function saveDraft(subject: string, html: string) {
   const key = process.env.BUTTONDOWN_API_KEY;
   if (!key) throw new Error('BUTTONDOWN_API_KEY is not set');
 
   const res = await fetch('https://api.buttondown.com/v1/emails', {
     method: 'POST',
     headers: { Authorization: `Token ${key}`, 'Content-Type': 'application/json' },
-    // status: draft — the line that stops it sending itself.
-    body: JSON.stringify({ subject, body, status: 'draft' }),
+    body: JSON.stringify({
+      subject,
+      body: html,
+      // status: draft — the line that stops it sending itself.
+      status: 'draft',
+      /* Tells Buttondown the body is finished HTML rather than Markdown to
+         be styled with their default template. Without this it wraps the
+         markup in its own styling and the branding is lost. */
+      email_type: 'premium',
+    }),
   });
 
   if (!res.ok) {
@@ -235,7 +257,15 @@ async function main() {
   const headline = text.match(/^#\s+(.+)$/m)?.[1]?.trim();
   const subject = headline || `Insurance market digest — ${MONTH_NAME}`;
 
-  const saved = await saveDraft(subject, text);
+  /* The H1 moves into the masthead, so the body renderer skips it — see
+     email-template.ts. */
+  const html = renderEmail({
+    headline: subject,
+    markdown: text,
+    monthCovered: MONTH_NAME,
+  });
+
+  const saved = await saveDraft(subject, html);
   const url = `https://buttondown.com/emails/${saved.id}`;
   console.log(`[newsletter] saved as draft ${saved.id}`);
 
