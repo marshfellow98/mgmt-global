@@ -34,3 +34,39 @@ services:
       # A personal address of Shane's, not a shared inbox.
       - key: CONFIDENTIAL_TO
         sync: false
+
+  # --------------------------------------------------------------------------
+  # Monthly newsletter draft.
+  #
+  # Runs 08:00 UTC on the 1st of each month. Gathers real data from
+  # Recruiterflow, drafts an issue with Claude, saves it to Buttondown as a
+  # DRAFT, and emails Shane a link. Nothing reaches subscribers without him
+  # pressing send.
+  #
+  # Billed per second of runtime — this runs for about twenty seconds a month.
+  # --------------------------------------------------------------------------
+  - type: cron
+    name: mgmtglobal-newsletter
+    runtime: node
+    plan: starter
+    region: oregon
+    branch: main
+    schedule: "0 8 1 * *"
+    buildCommand: npm install
+    command: npm run newsletter
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: BUTTONDOWN_API_KEY
+        sync: false
+      - key: RECRUITERFLOW_API_KEY
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: MAIL_FROM
+        sync: false
+      # Where the "draft is ready" email goes.
+      - key: NEWSLETTER_EDITOR
+        sync: false

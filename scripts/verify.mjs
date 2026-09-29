@@ -179,5 +179,33 @@ const ok  = (m) => console.log('  ok   ' + m);
   ok(`${n} asset links resolve`);
 }
 
+// ---------- 12. Newsletter cannot send on its own ----------
+{
+  /* The job must only ever create drafts. If someone changes status to
+     'sent' or adds a send call, several hundred industry inboxes get
+     whatever the model produced, unreviewed. */
+  const src = readFileSync('jobs/newsletter.ts', 'utf8');
+  if (!src.includes("status: 'draft'")) bad('newsletter: not explicitly saving as a draft');
+  else if (/status:\s*'(sent|scheduled|about_to_send)'/.test(src)) bad('newsletter: would send without review');
+  else ok('newsletter saves as draft only');
+}
+
+// ---------- 13. Every form action has a route behind it ----------
+{
+  /* The footer signup posted to /api/subscribe for weeks with no such route,
+     so every submission 404'd and was lost silently. */
+  const walk = (dir) => readdirSync(dir, { withFileTypes: true }).flatMap((e) =>
+    e.isDirectory() ? walk(join(dir, e.name)) : [join(dir, e.name)]);
+  const files = walk('src').filter((f) => f.endsWith('.tsx'));
+  const seen = new Set();
+  for (const f of files) {
+    for (const m of readFileSync(f, 'utf8').matchAll(/action="(\/api\/[^"]+)"/g)) {
+      seen.add(m[1]);
+      if (!existsSync(`src/app${m[1]}/route.ts`)) bad(`${f}: posts to ${m[1]} but no route handler exists`);
+    }
+  }
+  ok(`${seen.size} form endpoints have routes`);
+}
+
 console.log(fail ? `\n${fail} problem(s) found.` : '\nAll checks passed.');
 process.exit(fail ? 1 : 0);

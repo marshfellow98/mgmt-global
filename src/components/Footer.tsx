@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Wordmark } from './Wordmark';
 import { CONTACT } from '@/lib/content';
+import NewsletterForm from './NewsletterForm';
 
 const NAV = [
   ['/about', 'About'],
@@ -56,15 +57,3 @@ export default function Footer() {
   );
 }
 
-function NewsletterForm() {
-  return (
-    <form action="/api/subscribe" method="post" className="flex flex-wrap gap-2">
-      <input
-        type="email" name="email" required
-        placeholder="you@company.com" aria-label="Email address"
-        className="field min-w-[170px] flex-1"
-      />
-      <button type="submit" className="btn">Join</button>
-    </form>
-  );
-}

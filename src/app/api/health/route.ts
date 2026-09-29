@@ -35,6 +35,8 @@ export async function GET() {
     CONTACT_TO: { present: Boolean(process.env.CONTACT_TO) },
     CONFIDENTIAL_TO: { present: Boolean(process.env.CONFIDENTIAL_TO) },
     RECRUITERFLOW_API_KEY: { present: Boolean(process.env.RECRUITERFLOW_API_KEY) },
+    // Gates the footer signup form, not just the newsletter cron job.
+    BUTTONDOWN_API_KEY: { present: Boolean(process.env.BUTTONDOWN_API_KEY) },
     nodeEnv: process.env.NODE_ENV,
     checkedAt: new Date().toISOString(),
   });

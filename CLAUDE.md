@@ -385,3 +385,30 @@ same reason (verify.mjs knows about the exception).
 
 The route has its own layout that hides the site nav and footer. Someone
 opening the link should see the pitch and nothing else.
+
+## Monthly newsletter
+
+`jobs/newsletter.ts`, run by a Render cron job on the 1st of each month.
+Setup guide in `NEWSLETTER.md`.
+
+**It is an industry digest, not a firm update.** Live web search over the
+insurance trade press → digest with source links → Buttondown draft → email
+to Shane. Brokerage and carrier M&A, leadership moves, market conditions,
+talent and compensation.
+
+That framing is what makes automation work. A boutique doesn't generate
+enough internal news to fill a monthly, and firm commentary would have to be
+invented. External news is factual, checkable, and every claim carries a
+link. The firm's own news is a two-line footer.
+
+**The web_search tool is not optional.** Without it the model writes from
+stale training data and invents specifics — the exact failure an insurance
+executive spots immediately.
+
+**It must never send.** Not because the content is untrustworthy — it's
+sourced — but because Shane's read on what matters is what makes it his
+rather than a feed. `verify.mjs` fails the build if the status changes from
+`draft`.
+
+The brief is the `SYSTEM` constant. Plain English. The list of sections it
+searches for is there too.
