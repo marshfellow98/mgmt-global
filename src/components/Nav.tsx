@@ -87,11 +87,26 @@ export default function Nav() {
             ))}
           </div>
 
-          {/* Desktop CTA. Hidden on mobile, where it lives inside the menu —
-              the button plus a burger crowds a 390px bar. */}
-          <Link href="/contact" className="btn hidden shrink-0 whitespace-nowrap lg:inline-flex">
-            Book a Consultation <span className="arw">&rarr;</span>
-          </Link>
+          {/* Two audiences, two doors — but deliberately different weights.
+              Two filled buttons cancel each other out and make the visitor
+              choose before they know what the firm does. Employers get the
+              emphasis because they're the paying side; candidates get an
+              unmissable but unpressured route.
+
+              Candidates go to /confidential rather than /careers: careers is
+              the job board for people actively applying, and a senior
+              producer quietly wondering what's out there won't click that. */}
+          <div className="hidden shrink-0 items-center gap-6 lg:flex">
+            <Link
+              href="/confidential"
+              className="whitespace-nowrap text-[.74rem] font-semibold uppercase tracking-[.14em] text-[#9AA4AF] transition-colors hover:text-gold"
+            >
+              Explore opportunities
+            </Link>
+            <Link href="/contact" className="btn whitespace-nowrap">
+              Discuss a Search <span className="arw">&rarr;</span>
+            </Link>
+          </div>
 
           <button
             type="button"
@@ -147,7 +162,13 @@ export default function Nav() {
 
           <div>
             <Link href="/contact" className="btn w-full justify-center">
-              Book a Consultation <span className="arw">&rarr;</span>
+              Discuss a Search <span className="arw">&rarr;</span>
+            </Link>
+            <Link
+              href="/confidential"
+              className="mt-3 block w-full text-center text-[.78rem] font-semibold uppercase tracking-[.14em] text-[#9AA4AF]"
+            >
+              Or explore opportunities
             </Link>
             <p className="mt-6 text-center text-[.8rem] text-muted">
               info@mgmtglobal.com &middot; 469-458-6469

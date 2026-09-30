@@ -79,17 +79,18 @@ export default function Home() {
           </div>
           <h1 className="display-lg mb-6 sm:mb-8">
             <Line>Hire the insurance</Line>
-            <Line>producers your</Line>
+            <Line>talent your</Line>
             <Line><em className="accent">competitors wish</em></Line>
             <Line><em className="accent">they had.</em></Line>
           </h1>
           <p className="sub fade d2 mb-8 sm:mb-11">
-            For more than two decades, insurance organizations have come to MGMTGlobal when a hire
-            is too important to leave to chance.
+            Producers, executives, underwriters and whole teams. For more than two decades,
+            insurance organizations have come to MGMTGlobal when a hire is too important to
+            leave to chance.
           </p>
           <div className="fade d3 flex flex-wrap items-center gap-x-10 gap-y-5">
             <Magnetic href="/contact" className="btn">
-              Book a Consultation <span className="arw">&rarr;</span>
+              Discuss a Search <span className="arw">&rarr;</span>
             </Magnetic>
             <p className="m-0 max-w-[22ch] text-[.8rem] leading-snug text-muted">
               Exploring your next move, quietly?
@@ -211,6 +212,36 @@ export default function Home() {
           </h2>
         </Reveal>
         <SegmentRail />
+      </section>
+
+      {/* The candidate path had one line in the hero and nothing else on the
+          homepage. It's the thing no competitor offers and it was the least
+          visible thing on the site. */}
+      <section className="py-[clamp(4rem,10vw,9rem)]">
+        <Reveal className="shell grid gap-10 lg:grid-cols-2 lg:gap-[4.5rem]">
+          <div>
+            <div className="kick fade">For insurance professionals</div>
+            <h2 className="display">
+              <Line>Exploring your next</Line>
+              <Line><>move, <em className="accent">quietly?</em></></Line>
+            </h2>
+          </div>
+          <div>
+            <p className="fade d2">
+              You don&rsquo;t have to be actively looking to have a conversation.
+            </p>
+            <p className="fade d2">
+              We work with people who want to understand what exists without signalling that
+              they&rsquo;re considering a move. Your name goes nowhere without your say-so, and
+              we never contact you at work.
+            </p>
+            <p className="fade d3 mt-8">
+              <Link href="/confidential" className="lnk">
+                Explore opportunities <span>&rarr;</span>
+              </Link>
+            </p>
+          </div>
+        </Reveal>
       </section>
 
       <section className="bg-char2 py-[clamp(4rem,10vw,9rem)]">

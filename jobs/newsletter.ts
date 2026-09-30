@@ -255,7 +255,7 @@ async function main() {
 
   // The headline the model wrote becomes the subject line.
   const headline = text.match(/^#\s+(.+)$/m)?.[1]?.trim();
-  const subject = headline || `Insurance market digest — ${MONTH_NAME}`;
+  const subject = headline || `The Market Brief — ${MONTH_NAME}`;
 
   /* The H1 moves into the masthead, so the body renderer skips it — see
      email-template.ts. */

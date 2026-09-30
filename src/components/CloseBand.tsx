@@ -14,7 +14,7 @@ export default function CloseBand() {
           Thirty minutes, and you talk directly with our team.
         </p>
         <Magnetic href="/contact" className="btn fade d3">
-          Book a Consultation <span className="arw">&rarr;</span>
+          Discuss a Search <span className="arw">&rarr;</span>
         </Magnetic>
       </div>
     </Reveal>

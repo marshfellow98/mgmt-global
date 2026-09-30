@@ -459,3 +459,29 @@ Two things not to break: the sphere's arcs need `r` to be exactly half the
 span or they meet at points and read as a lens (verify.mjs checks this), and
 the section passes `wide` to PinnedSection — a skyline needs the full column,
 not the square box the globe uses.
+
+## Brand assets and favicons
+
+`public/brand/` holds the full set: logo (dark/light/white/black), icon
+(gold/white/black), wordmark (white/black). `public/logo.svg` is the
+dark-background variant, used in the nav and footer.
+
+Favicons live in `src/app/` — Next picks them up by filename, no `<link>`
+tags: `icon.svg`, `icon.png` (32px), `apple-icon.png` (180px). They use the
+**gold swoosh alone**, not the full logo — a wordmark at 16px is a smear.
+PNGs are rendered on the brand dark so the gold has contrast against a dark
+browser tab; a transparent favicon disappears there.
+
+## CTAs are split by audience
+
+Employers get the filled button (**Discuss a Search** → /contact).
+Candidates get a quieter text link (**Explore opportunities** →
+/confidential).
+
+Deliberately different weights. Two filled buttons cancel each other out and
+force a choice before the visitor knows what the firm does. Employers carry
+the emphasis because they're the paying side.
+
+Candidates go to `/confidential`, not `/careers` — careers is the job board
+for people actively applying, and a senior producer quietly testing the water
+won't click that.

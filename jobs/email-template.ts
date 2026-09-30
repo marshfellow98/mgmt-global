@@ -166,7 +166,7 @@ export function renderEmail(opts: {
               <div style="height:28px;"></div>
 
               <div style="font-family:${SANS};font-size:9px;letter-spacing:2.4px;text-transform:uppercase;color:${GOLD};font-weight:600;">
-                ${escapeHtml(opts.monthCovered)} &middot; Market digest
+                The Market Brief &middot; ${escapeHtml(opts.monthCovered)}
               </div>
               <h1 style="margin:12px 0 0;font-family:${SERIF};font-size:27px;line-height:1.2;font-weight:600;color:#ffffff;">
                 ${escapeHtml(opts.headline)}

@@ -74,9 +74,9 @@ export const DECK: Slide[] = [
     eyebrow: 'The record',
     heading: 'Twenty-five years in one market.',
     figures: [
-      { n: '1,500', unit: '+', label: 'Producers hired for key clients' },
+      { n: '1,500', unit: '+', label: 'Insurance professionals placed' },
       { n: '50', unit: '+', label: 'Years combined search experience' },
-      { n: '25', unit: 'yr', label: 'Proprietary talent database' },
+      { n: '25', unit: '+', label: 'Years of proprietary insurance relationships' },
       { n: '100', unit: '%', label: 'Insurance, no other industries' },
     ],
   },

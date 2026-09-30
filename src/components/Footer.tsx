@@ -40,10 +40,10 @@ export default function Footer() {
           </div>
           <div>
             <p className="mb-4 text-[.64rem] font-semibold uppercase tracking-[.2em] text-gold">
-              Stay ahead of the market
+              The Market Brief
             </p>
             <p className="mb-4 text-[.9rem] text-muted">
-              Industry hiring trends and insights, a few times a year.
+              Insurance M&amp;A, leadership moves and hiring trends. Monthly.
             </p>
             <NewsletterForm />
           </div>

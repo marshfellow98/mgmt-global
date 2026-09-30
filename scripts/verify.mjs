@@ -222,5 +222,15 @@ const ok  = (m) => console.log('  ok   ' + m);
   if (!bad_) ok(`skyline: ${arcs.length} arcs close correctly`);
 }
 
+// ---------- 15. Favicons present ----------
+{
+  /* Next's App Router picks these up from src/app/ by filename. Missing them
+     means the browser tab shows a blank page icon. */
+  for (const f of ['icon.svg', 'icon.png', 'apple-icon.png']) {
+    if (!existsSync(`src/app/${f}`)) bad(`missing src/app/${f}`);
+  }
+  if (existsSync('src/app/icon.svg')) ok('favicons present');
+}
+
 console.log(fail ? `\n${fail} problem(s) found.` : '\nAll checks passed.');
 process.exit(fail ? 1 : 0);
