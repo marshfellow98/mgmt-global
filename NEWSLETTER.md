@@ -104,8 +104,8 @@ BUTTONDOWN_API_KEY      same value
 ```
 
 That's what makes the footer signup form work. Without it the form returns an
-error. Check `/api/health` afterwards — `BUTTONDOWN_API_KEY` should show
-`present: true`.
+error. To confirm it took, submit your own address through the footer form and
+check that it appears in Buttondown.
 
 ---
 

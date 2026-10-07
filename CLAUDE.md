@@ -485,3 +485,36 @@ the emphasis because they're the paying side.
 Candidates go to `/confidential`, not `/careers` — careers is the job board
 for people actively applying, and a senior producer quietly testing the water
 won't click that.
+
+## Legacy URLs and the 404
+
+Google indexed the old Wix site. Those URLs now 404, which is what Search
+Console reports as **"Blocked due to other 4xx issue"** — a dead URL loses
+whatever ranking it had accumulated, and anyone clicking an old link or an
+old search result lands nowhere.
+
+**`next.config.mjs` holds the map.** Roughly forty 308s pointing old paths at
+their new equivalents. A 308 is permanent, so Google transfers the equity and
+eventually replaces the old URL in its index.
+
+The exact old URL list was never captured before the Wix site came down, so
+the map is built from the nav recorded in `content-inventory.md` plus the
+obvious variants (`/about-us`, `/aboutus`, `/contact-us`, `/career`). Listing a
+path that never existed costs nothing. **To find the ones that are missing,
+open the "Blocked due to other 4xx issue" report in Search Console** — it
+lists the real URLs Google is still trying to crawl. Add any that aren't in
+the map yet.
+
+`verify.mjs` check 16 guards the two ways this goes wrong: a redirect whose
+source shadows a real page (that page becomes permanently unreachable, and
+nothing else would catch it), and a redirect pointing at a route that doesn't
+exist (one 404 to another).
+
+**`src/app/not-found.tsx` is the safety net** for every old URL not in the
+map. It routes rather than apologises — four destinations covering everything
+the old site had, plus the confidential link. `noindex`, since a 404 should
+never appear in search results.
+
+The other two Search Console reasons are expected, not problems:
+*"Page with redirect"* is the www → non-www canonical, and *"Excluded by
+'noindex' tag"* is `/overview`, which is deliberate.

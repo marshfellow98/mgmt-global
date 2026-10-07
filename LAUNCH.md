@@ -143,10 +143,9 @@ progress under **Pages**.
 
 ## Step 7 — Tidy up (5 min)
 
-**Delete `/api/health`.** It did its job and there's no reason to leave a
-public endpoint reporting which environment variables are set.
-
-Delete `src/app/api/health/route.ts` from the repo and push.
+**~~Delete `/api/health`.~~ Done.** It did its job and there was no reason to
+leave a public endpoint reporting which environment variables are set. The
+route is gone from the repo; `mgmtglobal.com/api/health` returns 404.
 
 ---
 
@@ -177,5 +176,8 @@ still says pending, the DNS isn't resolving yet.
 `mgmtglobal-com.mail.protection.outlook.com`, priority 10. Fix this first,
 before anything else.
 
-**Forms stop working** — check `/api/health` before you delete it. Most
-likely an environment variable didn't carry over.
+**Forms stop working** — most likely an environment variable didn't carry
+over. Render → Environment, confirm `RESEND_API_KEY`, `CONTACT_TO` and
+`CONFIDENTIAL_TO` are all set, then redeploy. (The `/api/health` endpoint that
+used to report this has been removed; if you need it again, it's in the repo
+history.)

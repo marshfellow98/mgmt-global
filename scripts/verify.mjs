@@ -232,5 +232,55 @@ const ok  = (m) => console.log('  ok   ' + m);
   if (existsSync('src/app/icon.svg')) ok('favicons present');
 }
 
+// ---------- 16. Legacy redirects are sane ----------
+{
+  /* A redirect whose source matches a real route silently shadows that page —
+     the page still exists, builds, and is in the sitemap, but nobody can ever
+     reach it. And a redirect pointing at a route that doesn't exist sends the
+     visitor from one 404 to another. Both are invisible until someone clicks. */
+  const cfg = readFileSync('next.config.mjs', 'utf8');
+  const pairs = [...cfg.matchAll(/\['(\/[^']*)', '(\/[^']*)'\]/g)].map((m) => [m[1], m[2]]);
+
+  const routes = new Set();
+  const walk = (dir, url) => {
+    for (const e of readdirSync(dir, { withFileTypes: true })) {
+      if (!e.isDirectory() || e.name === 'api' || e.name.startsWith('_')) continue;
+      const seg = e.name.replace(/^\((.*)\)$/, '');           // route groups add no segment
+      const next = seg === e.name ? `${url}/${e.name}` : url;
+      if (existsSync(join(dir, e.name, 'page.tsx'))) routes.add(next || '/');
+      walk(join(dir, e.name), next);
+    }
+  };
+  if (existsSync('src/app/page.tsx')) routes.add('/');
+  walk('src/app', '');
+
+  if (!pairs.length) bad('no legacy redirects found in next.config.mjs');
+  let bad_ = 0;
+  for (const [source, destination] of pairs) {
+    const base = source.replace(/\/:.*$/, '');                 // /MGMT/:path* -> /MGMT
+    if (routes.has(source)) { bad(`redirect source ${source} shadows a real page`); bad_++; }
+    else if (source !== base && routes.has(base)) { bad(`redirect source ${source} shadows pages under ${base}`); bad_++; }
+    if (!routes.has(destination)) { bad(`redirect ${source} -> ${destination}, which is not a route`); bad_++; }
+  }
+  if (!bad_) ok(`${pairs.length} legacy redirects, none shadowing ${routes.size} real routes`);
+}
+
+// ---------- 17. Branded 404 ----------
+{
+  /* Any old URL without a redirect lands here, so it has to do more than
+     say "not found" — it's the last chance to route that visitor. */
+  const p = 'src/app/not-found.tsx';
+  if (!existsSync(p)) bad('missing src/app/not-found.tsx — old links hit the default Next 404');
+  else {
+    const src = readFileSync(p, 'utf8');
+    /* Count route paths wherever they appear — href="..." or, as here, a
+       data array the links are built from. */
+    const links = new Set([...src.matchAll(/['"](\/[a-z0-9/-]+)['"]/g)].map((m) => m[1])).size;
+    if (links < 3) bad(`404 page routes to ${links} destinations — should offer at least 3`);
+    else if (!/index: false/.test(src)) bad('404 page is missing robots noindex');
+    else ok(`404 page present, ${links} outbound links, noindex`);
+  }
+}
+
 console.log(fail ? `\n${fail} problem(s) found.` : '\nAll checks passed.');
 process.exit(fail ? 1 : 0);
