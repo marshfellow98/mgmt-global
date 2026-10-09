@@ -518,3 +518,64 @@ never appear in search results.
 The other two Search Console reasons are expected, not problems:
 *"Page with redirect"* is the www → non-www canonical, and *"Excluded by
 'noindex' tag"* is `/overview`, which is deliberate.
+
+## Staff login
+
+A padlock and "Login" at the far right of the nav, and the same at the bottom
+of the mobile menu, pointing at `/login` → the recruitment dashboard
+(a separate Render service). Shane asked for it; he works out of the dashboard
+daily and wanted one click from anywhere.
+
+**Nothing here authenticates anyone.** `src/app/login/route.ts` is a redirect
+and nothing else. The dashboard runs its own passcode gate — that was already
+true before this link existed, which is the only reason linking it publicly is
+acceptable. **Never add a credential, passcode or session check to this repo:**
+it's a public GitHub repo, and the dashboard reads candidate and client data.
+`verify.mjs` check 18 fails the build if that route so much as references a
+password, secret or token.
+
+Why a redirect rather than the onrender.com URL in an `href`:
+`mgmtglobal.com/login` is typeable from any device, and the dashboard's
+address then lives in exactly one place (`DASHBOARD_URL`, set in
+`render.yaml`) for when the service is renamed or moves to its own domain.
+It's a **307, not a 308** — browsers cache permanent redirects more or less
+forever, so a permanent one would strand him if the dashboard ever moved.
+
+Kept out of search: `robots.ts` disallows `/login`, the route sends
+`X-Robots-Tag: noindex, nofollow`, the nav link carries `rel="nofollow"`, and
+it's absent from the sitemap. The point is that the dashboard's passcode
+screen never appears in Google results.
+
+**It is deliberately the quietest thing in the bar** — padlock, `#6B7480`, set
+off behind a hairline. A prominent "Login" on a search firm's homepage makes
+candidates and clients wonder whether they were supposed to have an account,
+and that confusion lands on the main conversion surface. The word itself only
+appears above 1400px; below that the padlock stands alone with an
+`aria-label`.
+
+### The nav had no room, and the overflow was invisible
+
+Adding this surfaced a bug that predated it: at 1024–1152px the gold
+**"Discuss a Search" CTA was clipped off the right edge**, and `overflow-x:
+clip` on `body` (there to protect `position: sticky`) meant no scrollbar ever
+appeared. The primary call to action was sliced in half at common laptop
+widths with nothing to notice.
+
+Three changes made the bar fit at every width from 1024 to 1920:
+
+- `whitespace-nowrap` on the main links. "In Confidence" is the only two-word
+  label and it broke across two lines as soon as the row tightened.
+- Gaps tighten below 1280 (`gap-5 xl:gap-9`, `gap-4 xl:gap-6`).
+- **"Explore opportunities" is hidden below 1280.** It points at
+  `/confidential` and so does "In Confidence" in the main links — the same
+  destination twice in one bar, costing ~210px. Below 1280 "In Confidence"
+  carries that route; above it, both show as approved.
+
+The Login label appears at 1400 rather than 1280 on purpose: at exactly 1280
+"Explore opportunities" reappears, and both labels arriving on the same
+breakpoint was the one width that still overflowed.
+
+**Measure, don't eyeball, when touching the nav.** Because the overflow is
+clipped rather than scrolled, a broken bar looks fine in a screenshot of the
+left-hand side. Walk the widths and compare each element's
+`getBoundingClientRect().right` against `window.innerWidth`.

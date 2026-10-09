@@ -34,6 +34,11 @@ services:
       # A personal address of Shane's, not a shared inbox.
       - key: CONFIDENTIAL_TO
         sync: false
+      # Where /login sends staff. Not a secret — it's a public address that
+      # happens to be passcode-gated — so the value lives here rather than
+      # being typed into the dashboard. Change it here if the dashboard moves.
+      - key: DASHBOARD_URL
+        value: https://recruiter-dashboard-f8lz.onrender.com/
 
   # --------------------------------------------------------------------------
   # Monthly newsletter draft.

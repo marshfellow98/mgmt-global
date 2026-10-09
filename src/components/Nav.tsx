@@ -13,6 +13,26 @@ const LINKS = [
   { href: '/contact', label: 'Contact' },
 ];
 
+/* A padlock reads as "not for you" faster than any wording, which is exactly
+   what this link needs to say to the 99% of visitors who aren't Shane. */
+function LockIcon() {
+  return (
+    <svg
+      width="10"
+      height="12"
+      viewBox="0 0 10 12"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.2"
+      aria-hidden="true"
+      className="shrink-0"
+    >
+      <rect x="1" y="5" width="8" height="6.4" rx="1.2" />
+      <path d="M3 5V3.4a2 2 0 0 1 4 0V5" />
+    </svg>
+  );
+}
+
 export default function Nav() {
   const pathname = usePathname();
   const [solid, setSolid] = useState(false);
@@ -68,12 +88,19 @@ export default function Nav() {
         >
           <Wordmark />
 
-          <div className="hidden gap-9 lg:flex">
+          {/* Gaps tighten below 1280. The bar holds five links, two CTAs and
+              the login utility; at laptop widths the fixed 2.25rem gap pushed
+              the gold button off the right edge, and body's `overflow-x: clip`
+              hid it instead of showing a scrollbar — so the primary call to
+              action was simply sliced in half with nothing to notice. */}
+          <div className="hidden gap-5 lg:flex xl:gap-9">
             {LINKS.map((l) => (
               <Link
                 key={l.href}
                 href={l.href}
-                className={`group relative text-[.74rem] font-semibold uppercase tracking-[.14em] transition-colors ${
+                /* nowrap: "In Confidence" is the only two-word label and it
+                   broke across two lines as soon as the row got tight. */
+                className={`group relative whitespace-nowrap text-[.74rem] font-semibold uppercase tracking-[.14em] transition-colors ${
                   isActive(l.href) ? 'text-gold' : 'text-[#9AA4AF] hover:text-white'
                 }`}
               >
@@ -96,15 +123,46 @@ export default function Nav() {
               Candidates go to /confidential rather than /careers: careers is
               the job board for people actively applying, and a senior
               producer quietly wondering what's out there won't click that. */}
-          <div className="hidden shrink-0 items-center gap-6 lg:flex">
+          <div className="hidden shrink-0 items-center gap-4 lg:flex xl:gap-6">
+            {/* Hidden below 1280. This points at /confidential, and so does
+                "In Confidence" in the main links — the same destination twice
+                in one bar. It's ~210px, and it was what pushed the gold CTA
+                off the right edge at laptop widths. Above 1280 there's room
+                for both and the candidate path keeps its explicit wording;
+                below it, "In Confidence" still carries that route. */}
             <Link
               href="/confidential"
-              className="whitespace-nowrap text-[.74rem] font-semibold uppercase tracking-[.14em] text-[#9AA4AF] transition-colors hover:text-gold"
+              className="hidden whitespace-nowrap text-[.74rem] font-semibold uppercase tracking-[.14em] text-[#9AA4AF] transition-colors hover:text-gold xl:block"
             >
               Explore opportunities
             </Link>
             <Link href="/contact" className="btn whitespace-nowrap">
               Discuss a Search <span className="arw">&rarr;</span>
+            </Link>
+
+            {/* Staff login. Deliberately the quietest thing in the bar: it's
+                for one person, and a prominent "Login" on a search firm's
+                homepage makes every candidate and client wonder whether they
+                were supposed to have an account. Sits past the CTA behind a
+                hairline so it reads as a utility, not a third option.
+                rel=nofollow keeps crawlers off the dashboard. */}
+            <span aria-hidden="true" className="h-4 w-px bg-rule" />
+            <Link
+              href="/login"
+              rel="nofollow"
+              title="Dashboard sign-in (staff)"
+              aria-label="Dashboard login"
+              /* Below 1280 the word is dropped and the padlock stands alone.
+                 The label costs ~55px the bar doesn't have at laptop widths,
+                 and the icon alone is still a real target — aria-label and
+                 title carry the meaning for anyone who needs it. */
+              className="flex items-center gap-1.5 whitespace-nowrap text-[.7rem] font-semibold uppercase tracking-[.14em] text-[#6B7480] transition-colors hover:text-gold"
+            >
+              <LockIcon />
+              {/* 1400, not 1280: at exactly 1280 "Explore opportunities"
+                  reappears, and both labels arriving on the same breakpoint
+                  was the one width where the bar still overflowed. */}
+              <span className="hidden [@media(min-width:1400px)]:inline">Login</span>
             </Link>
           </div>
 
@@ -173,6 +231,16 @@ export default function Nav() {
             <p className="mt-6 text-center text-[.8rem] text-muted">
               info@mgmtglobal.com &middot; 469-458-6469
             </p>
+            {/* Same reasoning as the desktop bar — quietest item, below the
+                phone number, where only someone looking for it will find it. */}
+            <Link
+              href="/login"
+              rel="nofollow"
+              className="mt-5 flex items-center justify-center gap-1.5 text-[.7rem] font-semibold uppercase tracking-[.14em] text-[#6B7480]"
+            >
+              <LockIcon />
+              Login
+            </Link>
           </div>
         </div>
       </div>

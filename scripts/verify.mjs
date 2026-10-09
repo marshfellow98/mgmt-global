@@ -282,5 +282,38 @@ const ok  = (m) => console.log('  ok   ' + m);
   }
 }
 
+// ---------- 18. Staff login route is private and safe ----------
+{
+  /* /login leaves the site, which means three things can go wrong quietly:
+     it gets indexed and the dashboard shows up in search results; it ends up
+     in the sitemap, which actively asks Google to crawl it; or it sends
+     people somewhere over plain http. */
+  const p = 'src/app/login/route.ts';
+  if (!existsSync(p)) bad('missing src/app/login/route.ts');
+  else {
+    const src = readFileSync(p, 'utf8');
+    const robots = readFileSync('src/app/robots.ts', 'utf8');
+    const sitemap = readFileSync('src/app/sitemap.ts', 'utf8');
+    const nav = readFileSync('src/components/Nav.tsx', 'utf8');
+
+    if (!/'\/login'/.test(robots)) bad('/login is not disallowed in robots.ts');
+    else if (/\/login/.test(sitemap)) bad('/login is in the sitemap — that invites crawling');
+    else if (!/noindex/.test(src)) bad('/login route is missing its X-Robots-Tag noindex header');
+    else if (!/protocol !== 'https:'/.test(src)) bad('/login does not check the target is https');
+    else if (/, 308\)|permanent: true/.test(src)) bad('/login uses a permanent redirect — browsers cache those indefinitely');
+    else if (!/rel="nofollow"/.test(nav)) bad('nav login link is missing rel="nofollow"');
+    else ok('/login: noindex, out of the sitemap, https-only, non-permanent');
+
+    /* The dashboard holds candidate and client data. A credential reaching
+       this repo would be committed to a public GitHub repo. */
+    const code = src
+      .replace(/\/\*[\s\S]*?\*\//g, '')          // block comments
+      .replace(/^[ \t]*\/\/.*$/gm, '');          // line comments
+    if (/pass(code|word)|secret|token/i.test(code)) {
+      bad('/login route handles a credential — authentication belongs in the dashboard, never in this public repo');
+    } else ok('/login holds no credential');
+  }
+}
+
 console.log(fail ? `\n${fail} problem(s) found.` : '\nAll checks passed.');
 process.exit(fail ? 1 : 0);
