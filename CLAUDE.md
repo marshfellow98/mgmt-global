@@ -579,3 +579,72 @@ breakpoint was the one width that still overflowed.
 clipped rather than scrolled, a broken bar looks fine in a screenshot of the
 left-hand side. Walk the widths and compare each element's
 `getBoundingClientRect().right` against `window.innerWidth`.
+
+### Deck sizing: the type scale is height-aware
+
+Every size on the deck was a width-only clamp, e.g.
+`clamp(2rem, 6.2vw, 5rem)`. That is correct on a 1440x900 laptop and wrong in
+two places, both of which shipped:
+
+- **Short screens.** A 1366x768 or 1024x640 has plenty of width, so the
+  width term stayed large while there was much less height to put it in.
+- **Small phones.** At 360px wide the width term falls below the clamp floor,
+  so the floor renders — and the floors were chosen for desktop.
+
+Sizes now live as `--d-*` tokens in `globals.css` under `.deck`, each capped
+by height as well: `clamp(2rem, min(6.2vw, 9.5vh), 5rem)`. The vh
+coefficients are deliberately generous — at 1440x900 and 1920x1080 the width
+term still wins, so **what Shane approved on a normal laptop is pixel
+identical**. A `@media (max-width: 480px)` block drops the floors for phones.
+
+`.deck` on the root is load-bearing: without it every `var(--d-*)` resolves
+to nothing. verify.mjs check 19 asserts the class is present and that every
+token used in `Deck.tsx` is actually defined, since a typo would otherwise
+fall back silently.
+
+### Why text was printing through the logo
+
+The slide was one box: `flex h-full items-center overflow-y-auto` with the
+padding on it. **Centring an overflowing flex item pushes its top edge above
+the container's content box, and padding is not honoured in the overflow
+direction.** So the moment a slide was taller than the viewport, its heading
+rose up under the logo and there was no way to scroll back to it. On a 360px
+phone that is exactly what slide 6 did — "Retained Search" was printed
+straight through the wordmark.
+
+It is now two nested boxes: the outer one scrolls and carries no padding, the
+inner one takes the padding and `min-h-full`. Short content leaves the inner
+box at viewport height and `items-center` centres it as before; tall content
+grows it, so the top edge stays at padding-top. Overflow can no longer escape
+upward. Don't collapse these back into one element — verify.mjs fails if
+centring and scrolling land on the same box.
+
+### Spacing has to be keyed off height, not width
+
+The first pass at this tightened the slide rhythm with Tailwind `sm:` steps,
+which key off **width**. A 1024x640 laptop is wide but short, so it kept the
+full desktop rhythm and the dense slides still overflowed. The fix is the
+`@media (max-height: 740px)` block in `globals.css`, which repeats those cuts
+by height. Its selectors are element-qualified (`.deck h2` is 0,1,1) so they
+outrank single-class Tailwind margins without `!important`.
+
+### Scrims
+
+The chrome sits over a scrollable region, so padding can reserve space at the
+ends of a slide but cannot stop a line passing behind the dots mid-scroll.
+Two gradients — opaque across the chrome band, then fading — mean such a line
+disappears cleanly instead of ghosting through the indicators at 7% opacity,
+which read as a rendering fault.
+
+### Current state
+
+Nothing overlaps and nothing is clipped at 1920x1080, 1440x900, 1366x768,
+1280x800, 1024x640, 768x1024 or 390x844. On a 360px phone three dense slides
+(4, 6, 9) still scroll by 70–110px; every line clears the dots once scrolled,
+which was verified rather than assumed.
+
+**Measuring this needs the real fonts.** fonts.googleapis.com is unreachable
+from the build sandbox, and substituting Georgia changes the metrics enough to
+invalidate any overlap measurement. Install `@fontsource/source-serif-4` and
+`@fontsource/schibsted-grotesk` from npm, point `next/font/local` at those
+woff2 files for the duration of the test, and revert afterwards.

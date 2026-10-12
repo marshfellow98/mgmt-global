@@ -315,5 +315,59 @@ const ok  = (m) => console.log('  ok   ' + m);
   }
 }
 
+// ---------- 19. Deck sizing and overlap guards ----------
+{
+  /* The deck's chrome — logo, counter, dot indicators — is absolutely
+     positioned over a scrollable region, so three separate mistakes all show
+     up as text printed through the logo or the dots. All three happened. */
+  const deckRaw = readFileSync('src/app/overview/Deck.tsx', 'utf8');
+  const css = readFileSync('src/app/globals.css', 'utf8');
+  /* Strip comments before any structural test. The comments here quote the
+     broken patterns they warn about, so matching against raw source makes
+     the explanation itself trip the check. */
+  const deck = deckRaw
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/^[ \t]*\/\/.*$/gm, '');
+
+  // (a) The type scale only applies if the root carries the class.
+  if (!/className="deck /.test(deck)) {
+    bad('Deck root is missing the `deck` class — every var(--d-*) resolves to nothing');
+  }
+
+  // (b) Every token used must actually be defined, or it silently falls back.
+  const used = [...new Set([...deck.matchAll(/var\((--d-[a-z]+)\)/g)].map((m) => m[1]))];
+  const defined = new Set([...css.matchAll(/(--d-[a-z]+)\s*:/g)].map((m) => m[1]));
+  const missing = used.filter((v) => !defined.has(v));
+  if (missing.length) bad(`deck type tokens used but not defined in globals.css: ${missing.join(', ')}`);
+  else if (used.length) ok(`${used.length} deck type tokens all defined`);
+
+  // (c) Width-only clamps are what broke short screens. The ghost numeral is
+  //     allowed one, and it carries its own vh cap.
+  const rawClamps = [...deck.matchAll(/text-\[clamp\([^\]]*\)\]/g)].map((m) => m[0]);
+  if (rawClamps.length) {
+    bad(`Deck has width-only type clamps, which overflow short screens: ${rawClamps.join(' ')}`);
+  }
+
+  // (d) The safe-centring pattern. Centring an overflowing flex item pushes
+  //     its top above the padding box, which is how a heading ended up
+  //     printed through the logo with no way to scroll to it.
+  if (/items-center[^"]*overflow-y-auto|overflow-y-auto[^"]*items-center/.test(deck)) {
+    bad('Deck slide centres and scrolls on the same element — overflow will tuck under the logo. Use an inner min-h-full flex.');
+  } else if (!/min-h-full/.test(deck)) {
+    bad('Deck slide is missing the inner min-h-full box that keeps overflow below the chrome');
+  } else ok('deck slides centre safely (overflow grows the box, it does not escape it)');
+
+  // (e) Scrims, so anything that does scroll fades instead of colliding.
+  const scrims = (deck.match(/linear-gradient\(to (top|bottom),#05070A/g) || []).length;
+  if (scrims < 2) bad(`deck has ${scrims} chrome scrims, expected 2 (top and bottom)`);
+  else ok('deck top and bottom scrims present');
+
+  // (f) The height-keyed spacing block. Without it, wide-but-short laptops
+  //     keep the full desktop rhythm and the dense slides overflow.
+  if (!/@media \(max-height: \d+px\)[\s\S]{0,400}\.deck/.test(css)) {
+    bad('globals.css has no height-keyed .deck spacing block — short laptops will overflow');
+  } else ok('deck has height-keyed spacing for short viewports');
+}
+
 console.log(fail ? `\n${fail} problem(s) found.` : '\nAll checks passed.');
 process.exit(fail ? 1 : 0);

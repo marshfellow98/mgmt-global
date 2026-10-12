@@ -586,3 +586,82 @@ html.js .is-on .fade { opacity: 1; transform: none; }
 }
 
 
+
+/* ===========================================================================
+   /overview deck type scale
+
+   Every size here was originally a width-only clamp, e.g.
+   clamp(2rem, 6.2vw, 5rem). That holds up on a 1440x900 laptop and falls
+   apart in two places:
+
+   - Short screens. A 1366x768 or 1024x640 has plenty of width, so the
+     width-based term stays large while there is much less height to put it
+     in. Dense slides then outgrew the slide box.
+   - Small phones. At 360px wide the width term drops below the clamp floor,
+     so the floor is what renders — and the floors were set for desktop.
+
+   So each size is now capped by height as well via min(Xvw, Yvh), and the
+   floors drop on narrow screens. The vh coefficients are deliberately
+   generous: at 1440x900 and 1920x1080 the width term still wins, so the
+   sizing Shane approved on a normal laptop is unchanged.
+   =========================================================================== */
+.deck {
+  --d-hero:      clamp(2.2rem, min(7vw,   10.5vh), 5.6rem);
+  --d-statement: clamp(2rem,   min(6.2vw,  9.5vh), 5rem);
+  --d-close:     clamp(2rem,   min(5.8vw,  9vh),   4.6rem);
+  --d-heading:   clamp(1.8rem, min(4.4vw,  6.6vh), 3.4rem);
+  --d-figure:    clamp(2.4rem, min(5.5vw,  8.2vh), 4.4rem);
+  --d-item:      clamp(1.1rem, min(2vw,    2.9vh), 1.45rem);
+  --d-point:     clamp(1.05rem,min(1.9vw,  2.8vh), 1.3rem);
+  --d-step:      clamp(1rem,   min(1.7vw,  2.5vh), 1.2rem);
+  --d-stepnum:   clamp(1.6rem, min(3vw,    4.4vh), 2.4rem);
+  --d-quote:     clamp(.95rem, min(1.5vw,  2.2vh), 1.15rem);
+}
+
+/* Narrow phones. Below this the width term is already under every floor
+   above, so the floor is the only thing that renders and it has to come
+   down or dense slides collide with the logo and the dot indicators. */
+@media (max-width: 480px) {
+  .deck {
+    --d-hero:      1.95rem;
+    --d-statement: 1.65rem;
+    --d-close:     1.75rem;
+    --d-heading:   1.5rem;
+    --d-figure:    2rem;
+    --d-item:      1.02rem;
+    --d-point:     1rem;
+    --d-step:      .97rem;
+    --d-stepnum:   1.4rem;
+    --d-quote:     .92rem;
+  }
+  /* Matching cuts to the shared utilities the slides lean on. */
+  .deck .sub { font-size: .94rem; }
+  .deck .topline { padding-top: .85rem; }
+  .deck .topline h3 { font-size: var(--d-item); }
+  .deck .topline p { font-size: .86rem; margin-top: .45rem; }
+  .deck .quote { padding-left: 1rem; }
+  .deck .quote blockquote { margin-bottom: .9rem; }
+}
+
+/* Short viewports, any width.
+
+   The small-screen spacing cuts on the slides themselves are Tailwind `sm:`
+   steps, which key off *width*. A 1366x768 or 1024x640 laptop is wide but
+   short, so it kept the full desktop rhythm and the densest slides — proof,
+   why, segments — pushed their last line down behind the bottom scrim. This
+   is the same set of cuts, keyed off height instead.
+
+   These selectors are element-qualified (`.deck h2` is 0,1,1) so they
+   outrank the single-class Tailwind margins (0,1,0) without !important. */
+@media (max-height: 740px) {
+  .deck .kick { margin-bottom: .95rem; }
+  .deck h1, .deck h2 { margin-bottom: .55em; }
+  .deck .sub { margin-bottom: .9rem; }
+  .deck .quote { padding-left: 1.15rem; }
+  .deck .quote blockquote { margin-bottom: .75rem; line-height: 1.45; }
+  .deck .topline { padding-top: .8rem; }
+  .deck .topline p { margin-top: .45rem; }
+  /* The client-name band on the proof slide: its own border-y block. */
+  .deck .border-y { padding-top: .7rem; padding-bottom: .7rem; margin-bottom: 1.4rem; }
+  .deck ol > li p, .deck .grid p { line-height: 1.45; }
+}
