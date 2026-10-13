@@ -369,5 +369,124 @@ const ok  = (m) => console.log('  ok   ' + m);
   } else ok('deck has height-keyed spacing for short viewports');
 }
 
+// ---------- 20. Service PDFs carry only embedded brand fonts ----------
+{
+  /* Two separate things went wrong in these, and neither is visible from a
+     glance at the page:
+
+     1. Non-embedded base-14 fonts. reportlab writes Helvetica into every
+        page's resources by default, and the SVG renderer adds Times-Roman,
+        whether or not a glyph is ever drawn with them. A client-facing PDF
+        then declares two typefaces it doesn't carry — and on a machine
+        without them, a viewer substitutes.
+     2. The logo was a hand-drawn approximation — bezier strokes for the
+        swoosh, "MGMT" typeset in Source Serif — rather than the real
+        artwork. It read as an unrelated ornament above some serif text.
+
+     Byte-scanning the PDFs catches (1) directly. For (2), the real logo is
+     vector paths with no raster step, so an embedded image in these files
+     means someone swapped in a PNG. */
+  const dir = 'public/downloads';
+  if (!existsSync(dir)) bad('public/downloads is missing — the service PDFs are gone');
+  else {
+    const pdfs = readdirSync(dir).filter((f) => f.endsWith('.pdf'));
+    if (pdfs.length < 3) bad(`expected 3 service PDFs, found ${pdfs.length}`);
+
+    const BASE14 = /^(Helvetica|Times|Courier|Symbol|ZapfDingbats)/;
+    let bad_ = 0;
+    for (const f of pdfs) {
+      const buf = readFileSync(join(dir, f));
+      const txt = buf.toString('latin1');
+
+      const bases = [...new Set([...txt.matchAll(/\/BaseFont\s*\/([#A-Za-z0-9+\-,._]+)/g)].map((m) => m[1]))];
+      for (const b of bases) {
+        // An embedded subset is prefixed, e.g. AAAAAA+SchibstedGrotesk-Regular
+        const face = b.includes('+') ? b.split('+')[1] : b;
+        if (BASE14.test(face)) { bad(`${f}: declares non-embedded ${face}`); bad_++; }
+        else if (!b.includes('+')) { bad(`${f}: ${face} is not a subset — may not be embedded`); bad_++; }
+        else if (!/^(SchibstedGrotesk|SourceSerif4)/.test(face)) {
+          bad(`${f}: unexpected font ${face} — should be Schibsted Grotesk or Source Serif 4 only`); bad_++;
+        }
+      }
+      if (!bases.length) { bad(`${f}: no fonts found — is the file valid?`); bad_++; }
+
+      // The logo must stay vector. /Subtype /Image means a raster crept in.
+      if (/\/Subtype\s*\/Image/.test(txt)) {
+        bad(`${f}: contains a raster image — the logo should be vector from the brand SVG`); bad_++;
+      }
+    }
+    if (!bad_) ok(`${pdfs.length} service PDFs: brand fonts only, all embedded, fully vector`);
+  }
+
+  /* The generator must draw the real logo, not re-approximate it. */
+  if (existsSync('tools/build.py')) {
+    const b = readFileSync('tools/build.py', 'utf8').replace(/"""[\s\S]*?"""/g, '').replace(/^\s*#.*$/gm, '');
+    if (!/logo\(c, M, [^)]*logo\.svg/.test(b)) bad('tools/build.py cover is not drawing logo.svg');
+    else if (!/logo-light\.svg/.test(b)) bad('tools/build.py interior header is not drawing logo-light.svg');
+    else if (!/initialFontName/.test(b)) bad('tools/build.py does not set initialFontName — Helvetica will return');
+    else if (!/STATE_DEFAULTS\["fontName"\]/.test(b)) bad('tools/build.py does not override the graphics default font — Times-Roman will return');
+    else ok('PDF generator draws the real logo and sets both default fonts');
+  }
+}
+
+// ---------- 21. Job markup never invents a date or a place ----------
+{
+  /* JobPosting is the highest-value markup on the site and the easiest to
+     get penalised for. Google requires datePosted, and marking roles up with
+     a build-time or otherwise fabricated date is what its job-spam policy
+     targets — it can cost the site the jobs experience entirely. The schema
+     helper must therefore bail out rather than fill a gap. */
+  const sch = readFileSync('src/lib/schema.tsx', 'utf8');
+  const rf = readFileSync('src/lib/recruiterflow.ts', 'utf8');
+
+  if (!/export function jobPostingSchema/.test(sch)) {
+    bad('jobPostingSchema is gone — open roles lose their structured data');
+  } else {
+    const body = sch.slice(sch.indexOf('export function jobPostingSchema'));
+    const fn = body.slice(0, body.indexOf('\n/** Breadcrumbs'));
+    const code = fn.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+
+    if (!/if \(!job\.postedAt/.test(code)) bad('jobPostingSchema does not bail out when the feed gave no date');
+    else if (!/if \(!locations\.length\) return null/.test(code)) bad('jobPostingSchema would emit a posting with no jobLocation, which Google rejects');
+    else if (/Date\.now\(\)\)?\.toISOString|datePosted:\s*new Date\(\)/.test(code)) bad('jobPostingSchema is stamping datePosted from the clock — that is a fabricated date');
+    else ok('JobPosting: emits nothing without a real date and a real location');
+  }
+
+  if (!/postedAt: postedDate\(/.test(rf)) bad('recruiterflow.ts is not deriving postedAt');
+  else if (!/DATE_FIELDS/.test(rf)) bad('recruiterflow.ts lost its candidate date-field list');
+  else ok('job feed derives postedAt from the response, never the clock');
+}
+
+// ---------- 22. Headlines survive a naive tag strip ----------
+{
+  /* Display headlines are split into one block span per line. Browsers
+     render the break, but a text extractor that just removes tags — which
+     includes some of what crawls for AI answers — concatenates them, turning
+     the homepage h1 into "Hire the insurancetalent your". The trailing space
+     in Line.tsx is what prevents that, and it is invisible enough to be
+     "tidied away" by someone who doesn't know why it's there. */
+  const src = readFileSync('src/components/Line.tsx', 'utf8');
+  if (!/\{' '\}/.test(src)) {
+    bad("Line.tsx lost its trailing {' '} — headlines will run together for text extractors");
+  } else ok('headline lines keep their separating space');
+}
+
+// ---------- 23. Sitemap dates are real ----------
+{
+  /* `new Date()` on every entry tells Google all nine pages changed on every
+     deploy. Google discounts lastmod that behaves that way, so the signal is
+     worth less than honest dates. Careers is the one legitimate exception —
+     its listings really do change on their own. */
+  /* Comments first — this file's own explanation quotes `new Date()`, and
+     matching against raw source counted the warning as an offence. */
+  const src = readFileSync('src/app/sitemap.ts', 'utf8')
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/^\s*\/\/.*$/gm, '');
+  const nowCount = (src.match(/new Date\(\)/g) || []).length;
+  if (!/CONTENT_UPDATED/.test(src)) bad('sitemap has no per-route content dates');
+  else if (nowCount > 1) bad(`sitemap uses new Date() ${nowCount} times — only /careers should`);
+  else ok('sitemap carries real per-route dates');
+}
+
 console.log(fail ? `\n${fail} problem(s) found.` : '\nAll checks passed.');
 process.exit(fail ? 1 : 0);

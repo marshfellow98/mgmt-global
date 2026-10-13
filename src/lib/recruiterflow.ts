@@ -37,9 +37,51 @@ export type Job = {
   description: string | null;
   /** The API's `apply_link`. Never build this yourself. */
   applyUrl: string | null;
+  /** ISO date the role was opened, or null when the feed didn't give one. */
+  postedAt: string | null;
+  /** Raw city/state per location, for JobPosting markup. */
+  places: { city?: string | null; state?: string | null; country?: string | null }[];
 };
 
 type RawLocation = { city?: string | null; state?: string | null; country?: string | null; name?: string | null };
+
+/* Candidate names for "when was this role opened".
+
+   The published spec is paginated and its job schema wasn't reachable, so
+   rather than guess one name — which is how this file got four things wrong
+   the first time — we accept any of the plausible ones and take the first
+   that parses. `last_opened` is the strongest candidate: it's the field name
+   Recruiterflow uses for a job's date inside client responses, which is the
+   one job-shaped object the published spec does show.
+
+   If none of these is present, `postedAt` stays null and no JobPosting
+   markup is emitted at all. Check Render's logs for the `[RF] first record
+   fields` line to see the real names on this account, then add the right one
+   here and delete the rest. */
+const DATE_FIELDS = [
+  'last_opened',
+  'published_on',
+  'created_on',
+  'created_at',
+  'date_posted',
+  'open_date',
+  'opened_on',
+] as const;
+
+function postedDate(raw: Record<string, unknown>): string | null {
+  for (const f of DATE_FIELDS) {
+    const v = raw[f];
+    if (typeof v !== 'string' && typeof v !== 'number') continue;
+    const d = new Date(v);
+    if (Number.isNaN(d.getTime())) continue;
+    // A date in the future, or before the firm existed, is a misread field
+    // rather than a real posting date.
+    const year = d.getUTCFullYear();
+    if (year < 2000 || d.getTime() > Date.now() + 86400_000) continue;
+    return d.toISOString();
+  }
+  return null;
+}
 type RawJob = {
   id?: number | string;
   title?: string;
@@ -72,6 +114,12 @@ function normalise(raw: RawJob): Job {
     /* Falls back to the hosted careers page. A listing with a slightly
        generic link is far better than a role that silently doesn't exist. */
     applyUrl: raw.apply_link ?? CAREERS_FALLBACK,
+    postedAt: postedDate(raw as unknown as Record<string, unknown>),
+    places: (raw.locations ?? []).map((l) => ({
+      city: l.city ?? l.name ?? null,
+      state: l.state ?? null,
+      country: l.country ?? null,
+    })),
   };
 }
 
@@ -135,6 +183,9 @@ export async function getOpenJobs(): Promise<Job[]> {
         publish_to_careers_page: list[0].publish_to_careers_page,
         has_apply_link: Boolean(list[0].apply_link),
         has_title: Boolean(list[0].title || list[0].name),
+        // Which date field, if any, this account actually returns. Without
+        // one, JobPosting markup is skipped — see schema.tsx.
+        date_field: DATE_FIELDS.find((f) => (list[0] as Record<string, unknown>)[f] != null) ?? 'NONE',
       }));
     }
 

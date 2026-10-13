@@ -5,6 +5,7 @@ import Line from '@/components/Line';
 import CloseBand from '@/components/CloseBand';
 import JobBoard from './JobBoard';
 import { getOpenJobs, locationsOf } from '@/lib/recruiterflow';
+import { JsonLd, jobPostingSchema } from '@/lib/schema';
 
 export const metadata: Metadata = {
   title: 'Insurance Jobs & Careers | Open Roles at MGMTGlobal',
@@ -26,8 +27,13 @@ export default async function Careers() {
   const jobs = await getOpenJobs();
   const locations = locationsOf(jobs);
 
+  /* One JobPosting per open role. Roles whose feed record carried no usable
+     date are skipped rather than given an invented one — see schema.tsx. */
+  const postings = jobs.map(jobPostingSchema).filter(Boolean) as object[];
+
   return (
     <>
+      {postings.length > 0 && <JsonLd data={postings} />}
       <Reveal as="header" immediate className="glow border-b border-rule">
         <div
           className="shell"

@@ -25,11 +25,14 @@ from reportlab.lib.utils import simpleSplit
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
+from reportlab.graphics import renderPDF
 
 from content import DOCS, CONTACT, GOLD, INK, RULE, MUTED, BODY
 
 FONT_DIR = "/tmp/pdffonts/ttf"
 OUT_DIR = os.path.join(os.path.dirname(__file__), "out")
+# The brand SVGs the site serves — same files, not copies.
+PUBLIC = os.path.join(os.path.dirname(__file__), "..", "public")
 
 W, H = LETTER
 M = 58                      # page margin
@@ -41,6 +44,15 @@ BODY_C = HexColor(BODY)
 
 
 def register_fonts():
+    """Register the brand faces, and make them the defaults.
+
+    Both default-font lines matter for a clean PDF: reportlab's canvas
+    defaults to Helvetica and its graphics layer (which svglib renders
+    through) defaults to Times-Roman. Neither is ever used to draw a glyph
+    here, but both get written into the page's font resources as
+    non-embedded base-14 fonts, so `pdffonts` reports two typefaces the
+    document doesn't carry and doesn't use.
+    """
     faces = {
         "Serif": "SourceSerif-Regular.ttf",
         "Serif-SB": "SourceSerif-SemiBold.ttf",
@@ -51,6 +63,61 @@ def register_fonts():
     }
     for name, f in faces.items():
         pdfmetrics.registerFont(TTFont(name, os.path.join(FONT_DIR, f)))
+
+    from reportlab.graphics.shapes import STATE_DEFAULTS
+    STATE_DEFAULTS["fontName"] = "Sans"
+
+
+_LOGO_CACHE = {}
+
+
+def logo(c, x, top, variant="logo.svg", width=160.0):
+    """Draw the real logo as vector, anchored by its top-left corner.
+
+    This replaces a hand-drawn approximation: three bezier strokes standing in
+    for the swoosh, plus the word "MGMT" typeset in Source Serif. Those were
+    never the logo. The swoosh in the real mark is a tight gold fan locked up
+    immediately left of the wordmark; the approximation rendered it as a large
+    detached arc floating well above the type, and the wordmark's letterforms
+    are custom, not Source Serif. On the cover it read as an unrelated
+    ornament sitting over some serif text.
+
+    The brand SVGs are outlined paths with no text elements, so svglib
+    converts them to reportlab vector shapes exactly — the PDF carries the
+    same artwork the website serves, at any zoom, with no raster step.
+
+    `variant` must suit the background: logo.svg (white wordmark, gold
+    swoosh) on the dark cover, logo-light.svg (dark wordmark, gold swoosh) on
+    the cream interior. Using the wrong one makes the wordmark vanish.
+    """
+    if variant not in _LOGO_CACHE:
+        import re
+        from svglib.svglib import svg2rlg
+
+        src = os.path.join(PUBLIC, variant if variant == "logo.svg" else os.path.join("brand", variant))
+        raw = open(src, encoding="utf-8").read()
+        # The brand files carry a large c2pa metadata block. It isn't artwork
+        # and svglib has no reason to parse it.
+        cleaned = re.sub(r"<metadata>.*?</metadata>", "", raw, flags=re.S)
+        tmp = os.path.join(OUT_DIR, f"_{variant}")
+        os.makedirs(OUT_DIR, exist_ok=True)
+        with open(tmp, "w", encoding="utf-8") as fh:
+            fh.write(cleaned)
+        _LOGO_CACHE[variant] = svg2rlg(tmp)
+        os.remove(tmp)
+
+    from copy import deepcopy
+
+    d = deepcopy(_LOGO_CACHE[variant])
+    s = width / d.width
+    d.scale(s, s)
+    d.width *= s
+    d.height *= s
+    # renderPDF leaves font and colour state behind it, so fence it off.
+    c.saveState()
+    renderPDF.draw(d, c, x, top - d.height)
+    c.restoreState()
+    return d.height
 
 
 def tracked(c, x, y, text, font, size, spacing, color):
@@ -84,23 +151,8 @@ def cover(c, doc):
     c.setFillColor(INK_C)
     c.rect(0, 0, W, H, stroke=0, fill=1)
 
-    # The logo arc, drawn as three strokes of decreasing weight.
-    c.setLineCap(1)
-    for i, (off, wgt, alpha) in enumerate([(0, 2.6, 1), (9, 2.0, 0.55), (17, 1.4, 0.28)]):
-        c.setStrokeColor(HexColor(GOLD))
-        c.setStrokeAlpha(alpha)
-        c.setLineWidth(wgt)
-        p = c.beginPath()
-        p.moveTo(M + off, H - 150)
-        p.curveTo(M + 30 + off, H - 96, M + 96 + off, H - 84, M + 150 + off, H - 104)
-        c.drawPath(p, stroke=1, fill=0)
-    c.setStrokeAlpha(1)
-
-    # Wordmark
-    c.setFont("Serif-SB", 21)
-    c.setFillColor(white)
-    c.drawString(M, H - 200, "MGMT")
-    tracked(c, M + 1, H - 214, "GLOBAL CONSULTING", "Sans", 6, 2.6, HexColor("#9AA4AF"))
+    # The logo — the real artwork, white wordmark for the dark cover.
+    logo(c, M, H - 92, "logo.svg", width=168)
 
     # Document label
     kicker(c, M, 300, doc["eyebrow"])
@@ -131,8 +183,10 @@ def interior(c, doc):
     c.setFillColor(HexColor("#FBFAF7"))
     c.rect(0, 0, W, H, stroke=0, fill=1)
 
-    # Running head
-    tracked(c, M, H - 52, "MGMT GLOBAL CONSULTING", "Sans-SB", 6.5, 2.0, MUTED_C)
+    # Running head. The logo proper, dark-wordmark variant for the cream
+    # page — this was "MGMT GLOBAL CONSULTING" set as letter-spaced type,
+    # which is a caption, not the mark.
+    logo(c, M, H - 28, "logo-light.svg", width=92)
     c.setFont("Sans", 6.5)
     c.setFillColor(MUTED_C)
     c.drawRightString(W - M, H - 52, doc["eyebrow"].upper())
@@ -215,7 +269,11 @@ def interior(c, doc):
 def build(doc):
     os.makedirs(OUT_DIR, exist_ok=True)
     path = os.path.join(OUT_DIR, f'mgmtglobal-{doc["slug"]}.pdf')
-    c = canvas.Canvas(path, pagesize=LETTER)
+    # initialFontName keeps Helvetica out of the page resources. reportlab
+    # selects Helvetica by default and writes it into every page whether or
+    # not a glyph is ever drawn with it, which leaves a client-facing PDF
+    # advertising a font it doesn't embed.
+    c = canvas.Canvas(path, pagesize=LETTER, initialFontName="Sans", initialFontSize=10)
     c.setTitle(f'MGMTGlobal — {doc["eyebrow"]}')
     c.setAuthor("MGMT Global Consulting")
     c.setSubject(doc["lede"])

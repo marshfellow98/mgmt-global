@@ -648,3 +648,125 @@ from the build sandbox, and substituting Georgia changes the metrics enough to
 invalidate any overlap measurement. Install `@fontsource/source-serif-4` and
 `@fontsource/schibsted-grotesk` from npm, point `next/font/local` at those
 woff2 files for the duration of the test, and revert afterwards.
+
+### Service PDFs: the logo was never the logo
+
+`tools/build.py` drew the cover mark as three bezier strokes for the swoosh
+plus "MGMT" typeset in Source Serif, and the interior running head as the
+words "MGMT GLOBAL CONSULTING" letter-spaced. None of that is the logo. The
+real swoosh is a tight gold fan locked up immediately left of the wordmark,
+and the wordmark's letterforms are custom — so the approximation rendered as a
+large detached arc floating above some serif text, which is what Shane spotted
+as not belonging to the firm.
+
+It now draws `public/logo.svg` on the dark cover and
+`public/brand/logo-light.svg` on the cream interior, via `svglib`. Those are
+outlined paths with no text elements, so they convert to reportlab vector
+shapes exactly — the PDFs carry the same artwork the site serves, crisp at any
+zoom, with zero embedded rasters. **Match the variant to the background:**
+`logo.svg` is a white wordmark for dark, `logo-light.svg` a dark wordmark for
+light. The wrong one makes the wordmark vanish.
+
+### Two default fonts, both of which leak
+
+The PDFs also declared **Helvetica and Times-Roman, neither embedded**, while
+never drawing a glyph with either:
+
+- reportlab's canvas defaults to Helvetica and writes it into every page's
+  font resources regardless of use → fixed with
+  `canvas.Canvas(..., initialFontName="Sans")`.
+- reportlab's *graphics* layer, which svglib renders through, defaults to
+  Times-Roman → fixed by setting `STATE_DEFAULTS["fontName"]`.
+
+A client-facing PDF declaring fonts it doesn't carry invites a viewer on
+another machine to substitute. All four faces are now embedded brand subsets
+and nothing else.
+
+`verify.mjs` check 20 byte-scans the shipped PDFs for any `/BaseFont` that
+isn't an embedded Schibsted Grotesk or Source Serif 4 subset, fails on any
+`/Subtype /Image` (the logo must stay vector), and asserts the generator still
+draws both SVGs and sets both default fonts. It was confirmed to fail against
+the previously shipped files.
+
+**Regenerating needs the npm fonts plus svglib** — see `tools/README.md`.
+
+## AEO / GEO
+
+The foundations were already right: every page is server-rendered with real
+text (215–831 words in the initial HTML, no JS needed), headings are a proper
+h1/h2/h3 hierarchy, and `robots.txt` blocks no AI crawler — GPTBot, ClaudeBot
+and PerplexityBot are all free to read the site. Plenty of design-led sites
+fail one of those and become invisible to answer engines.
+
+Three gaps were closed; the biggest remaining ones are content, not code.
+
+### JobPosting markup — and why it refuses to guess
+
+`jobPostingSchema` in `schema.tsx` emits one `JobPosting` per open role. For a
+search firm this is the highest-value markup on the site: it's what makes
+roles eligible for the jobs experience and answerable by an assistant asked
+who's hiring producers in Dallas.
+
+It is also the easiest to be penalised for. Google requires `datePosted`, and
+marking roles up with a fabricated or always-current date is precisely what
+its job-spam policy targets — stamping build time would claim every role was
+posted today, on every deploy. **So the helper returns `null` rather than fill
+a gap**, on a missing or unparseable date and on a missing location
+(`jobLocation` is required unless a role is explicitly remote, and the feed
+has no remote flag — absent location is missing data, not evidence of remote).
+The careers page renders only what comes back, so the failure mode is no
+markup rather than wrong markup.
+
+**It is currently dormant and will switch itself on.** The published
+Recruiterflow spec is paginated and its job schema wasn't reachable, so rather
+than guess a field name — how this integration got four things wrong the first
+time — `DATE_FIELDS` in `recruiterflow.ts` accepts any of several plausible
+names and takes the first that parses into a sane date. `last_opened` is the
+strongest candidate: it's the name Recruiterflow uses for a job's date inside
+the client responses the spec does show.
+
+**To confirm it:** Render's logs carry a `[RF] gate values` line with
+`date_field`, naming whichever field this account actually returns, or `NONE`.
+Read it, keep the right name in `DATE_FIELDS`, delete the rest. Until then
+roles render normally with no job markup.
+
+### Headlines and naive text extraction
+
+Display headlines are one block span per line. A browser renders the break,
+but an extractor that merely strips tags concatenates them — the homepage h1
+came out as *"Hire the insurancetalent yourcompetitors wishthey had."* The
+trailing `{' '}` in `Line.tsx` fixes it; it sits at the end of a block so it
+cannot affect layout. Verified by stripping tags with a bare regex, which is
+roughly the crudest thing that might read the page. Don't tidy it away —
+verify.mjs check 22 fails without it.
+
+### Sitemap dates
+
+Every entry carried the build time, which told Google all nine pages changed
+on every deploy, including deploys that touched one redirect. Google discounts
+`lastmod` that behaves that way, so the signal was worth less than honest
+dates. `CONTENT_UPDATED` now holds a real date per route — **update it when
+you change a page's copy, not when you deploy.** `/careers` is the one
+legitimate exception and passes `live`, because its listings genuinely change
+without a deploy.
+
+### What's left, in order of value
+
+1. **Publish the newsletter on the site.** The monthly digest — original,
+   dated, sourced commentary on insurance M&A and leadership moves — goes to
+   Buttondown and nowhere else. On mgmtglobal.com it would be exactly the kind
+   of citable, freshly-dated material answer engines look for. It is the
+   biggest single miss and it needs no new writing.
+2. **Question-shaped content plus `FAQPage`.** Answer engines quote passages
+   that answer a question. The site is declarative brand prose; nobody asks
+   "a screening method designed for high performers". They ask what retained
+   search costs, how long it takes, how it differs from contingency. **Those
+   answers need Shane** — don't invent fee structures, timelines or
+   guarantees.
+3. **Thicker service pages.** ~426 words is thin for a page you want quoted.
+4. Being written about elsewhere — trade press, directories, LinkedIn — drives
+   more AI mentions than anything on-site, and isn't a code change.
+
+`llms.txt` was considered and skipped: cheap to add, but the evidence it does
+anything is weak, and this file would rather record that judgement than carry
+a file nobody reads.
