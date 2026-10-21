@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { looksLikeSpam, clean, validEmail } from '@/lib/mail';
+import { clean, validEmail } from '@/lib/mail';
+import { looksLikeSpam, clientKey, rateLimit } from '@/lib/guard';
 
 export const runtime = 'nodejs';
 
@@ -28,6 +29,12 @@ export async function POST(req: Request) {
 
   // Silently accept spam — telling a bot it failed invites a retry.
   if (looksLikeSpam(form)) return NextResponse.json({ ok: true });
+
+  /* This one posts to Buttondown rather than Resend, so it can't burn the
+     mail allowance — but an unlimited endpoint is still a free way to stuff
+     someone's subscriber list. */
+  const who = clientKey(req);
+  if (!rateLimit(`n:h:${who}`, 4, 60 * 60 * 1000)) return NextResponse.json({ ok: true });
 
   const email = clean(form, 'email', 200);
   if (!validEmail(email)) {

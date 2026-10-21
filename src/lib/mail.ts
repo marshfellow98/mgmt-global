@@ -60,26 +60,10 @@ export async function sendMail({
   }
 }
 
-/* ----------------------------------------------------------------------------
-   Spam handling without a CAPTCHA.
-
-   A CAPTCHA on a confidential inquiry form is exactly the wrong signal — it
-   tells a cautious executive that the firm is worried about them. These two
-   checks cost the visitor nothing and stop the overwhelming majority of bots:
-
-   - A honeypot field, hidden from people, that bots fill in.
-   - A timestamp. A human takes more than three seconds to complete a form;
-     a script posts instantly.
-   ---------------------------------------------------------------------------- */
-
-export function looksLikeSpam(form: FormData): boolean {
-  if (String(form.get('company_website') || '').trim() !== '') return true;
-
-  const started = Number(form.get('started_at') || 0);
-  if (started && Date.now() - started < 3000) return true;
-
-  return false;
-}
+/* Spam handling lives in guard.ts — honeypot, timing, rate limits, per-form
+   daily budgets and duplicate suppression, in one place. It is deliberately
+   not here: this file sends mail and should have no opinion about whether a
+   submission deserves sending. */
 
 export function clean(form: FormData, key: string, max = 4000): string {
   return String(form.get(key) ?? '').trim().slice(0, max);

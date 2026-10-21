@@ -488,5 +488,51 @@ const ok  = (m) => console.log('  ok   ' + m);
   else ok('sitemap carries real per-route dates');
 }
 
+// ---------- 24. Form abuse guard ----------
+{
+  /* A bot burned the whole Resend daily allowance before 9am by POSTing at
+     /api/contact. Two regressions would reopen that, and neither is visible
+     from reading a page. */
+  const g = readFileSync('src/lib/guard.ts', 'utf8');
+  const code = g.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+
+  /* The original hole: `if (started && ...)` meant a POST that simply left
+     out started_at skipped the timing check rather than failing it. The
+     field must be required. */
+  if (/if \(started &&/.test(code)) {
+    bad('guard.ts: started_at is optional again — omitting it bypasses the timing check');
+  } else if (!/raw === null\) return true/.test(code)) {
+    bad('guard.ts: looksLikeSpam no longer rejects a missing started_at');
+  } else ok('guard: a missing timestamp is rejected, not skipped');
+
+  const contact = readFileSync('src/app/api/contact/route.ts', 'utf8');
+  const conf = readFileSync('src/app/api/confidential/route.ts', 'utf8');
+
+  /* Separate budgets are what keeps contact spam from consuming the sends a
+     confidential enquiry needs. Sharing one name silently re-couples them. */
+  const cName = contact.match(/withinBudget\('([a-z]+)'/)?.[1];
+  const xName = conf.match(/withinBudget\('([a-z]+)'/)?.[1];
+  if (!cName || !xName) bad('a form route is not applying a daily send budget');
+  else if (cName === xName) bad(`both forms share the budget '${cName}' — contact spam can starve /confidential`);
+  else ok(`per-form send budgets are separate (${cName}, ${xName})`);
+
+  for (const [name, src] of [['contact', contact], ['confidential', conf]]) {
+    if (!/rateLimit\(/.test(src)) bad(`${name} route has no per-IP rate limit`);
+  }
+
+  /* The two caps must fit inside the mail allowance with room to spare, or
+     an attack still ends the day's sending. Resend's free tier is 100/day. */
+  const caps = [contact, conf].map((s2) => Number(s2.match(/DAILY_MAX = (\d+)/)?.[1] ?? 0));
+  const total = caps.reduce((a, b) => a + b, 0);
+  if (!caps.every(Boolean)) bad('a form route is missing its DAILY_MAX');
+  else if (total > 90) bad(`form budgets total ${total}/day — too close to Resend's 100/day free tier`);
+  else ok(`form budgets total ${total}/day, inside the mail allowance`);
+
+  /* /confidential must not gain the contact form's content hashing. */
+  if (/firstTimeSeeing/.test(conf)) {
+    bad('/confidential is hashing message content — that breaks its discretion promise');
+  } else ok('/confidential still hashes nothing about the message');
+}
+
 console.log(fail ? `\n${fail} problem(s) found.` : '\nAll checks passed.');
 process.exit(fail ? 1 : 0);

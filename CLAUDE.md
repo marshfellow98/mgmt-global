@@ -303,9 +303,9 @@ notification gives nothing away.
 
 **Spam handling is a honeypot plus a timestamp, not a CAPTCHA.** Asking a
 cautious executive to prove they're human on a confidential enquiry form is
-exactly the wrong signal. The honeypot is a hidden field bots fill in; the
-timestamp rejects anything submitted in under three seconds. Spam gets a
-silent success response — telling a bot it failed just invites a retry.
+exactly the wrong signal. Spam gets a silent success response — telling a bot
+it failed just invites a retry. See **Form abuse guard** below: those two
+checks alone were not enough and the full set now lives in `guard.ts`.
 
 Forms keep a real `action` and `method`, so they still work if JavaScript
 fails. The fetch submission is an enhancement on top.
@@ -770,3 +770,85 @@ without a deploy.
 `llms.txt` was considered and skipped: cheap to add, but the evidence it does
 anything is weak, and this file would rather record that judgement than carry
 a file nobody reads.
+
+
+## Form abuse guard
+
+A bot hammered `/api/contact` and consumed the entire Resend daily allowance
+before 9am, so the site could not send anything for the rest of that day.
+`src/lib/guard.ts` is the response, and it holds every rule for every form.
+
+### Why the original defences did nothing
+
+The honeypot only catches a bot that submits the *rendered* form — one
+POSTing straight at the endpoint just never sends `company_website`, and an
+empty value passes.
+
+The timing check had a hole:
+
+```ts
+const started = Number(form.get('started_at') || 0);
+if (started && Date.now() - started < 3000) return true;   // WRONG
+```
+
+A missing `started_at` makes `started` zero, which is falsy, so the check was
+**skipped rather than failed**. Omitting the field was easier than defeating
+it. `started_at` is now required and must be sane: present, numeric, at least
+three seconds old, under a day old, and not in the future. verify.mjs check
+24 fails if that `if (started &&` pattern ever returns.
+
+### What actually caps the damage
+
+Spam filtering is best-effort; a budget is not. Each form has **its own**
+daily send ceiling — contact 40, confidential 30 — so an attack can only
+exhaust the form it targets.
+
+That separation is the point. Resend's allowance is shared, so before this a
+flood of contact spam would have consumed every send for the day and a
+genuine confidential enquiry — the highest-stakes message this site carries —
+would have silently failed to arrive. The totals also stay inside Resend's
+100/day free tier with headroom, which verify.mjs checks.
+
+The rest, in the order a request meets them: honeypot and timestamp, per-IP
+rate limits (contact 3/hour and 8/day, confidential 5/hour, newsletter
+4/hour), conservative content heuristics, duplicate suppression, then the
+budget.
+
+### Deliberate asymmetry between the two forms
+
+`/confidential` gets **lighter** protection on purpose:
+
+- **No content de-duplication.** Hashing what someone wrote, even in memory
+  and even unreadable, is the one thing that page should not do. The contact
+  route does hash — it's what stops the repeated-name attack — and verify.mjs
+  fails if `firstTimeSeeing` ever appears in the confidential route.
+- **No log line when its budget is hit.** The contact route logs a bare
+  count; this one stays silent, because even "an enquiry was dropped at
+  09:14" is more than that page should record.
+- A more generous rate limit. Someone reaching out quietly may hesitate,
+  close the tab and come back.
+
+### Trade-offs worth knowing
+
+**State is in-memory.** No database, which keeps the "nothing is stored"
+promise intact, and IPs are hashed rather than held. The cost is that a
+deploy or restart resets the counters. That's acceptable — the budget is a
+backstop, not an audit trail — but it does mean a redeploy during an attack
+hands the attacker a fresh allowance. It also assumes one instance; if the
+service is ever scaled out, each instance carries its own budget and the
+effective caps multiply.
+
+**Heuristics are tuned to under-block.** A false positive is a lost client
+enquiry, which costs far more than a spam message getting through, so each
+content rule is something a real insurance executive would never trip: a URL
+in the *name* or *company* field, three or more links in the message, BBCode
+link syntax. Nothing about wording, and no keyword list.
+
+**Resend cannot help here.** It's an outbound API — its suppression list is
+for recipients who bounced or complained, and the recipient is always Shane's
+inbox. The spammer's address only ever appears as `replyTo`. There is nothing
+to block at that layer; the fix has to be at the form.
+
+**If the bot adapts**, the next step is Cloudflare Turnstile on the contact
+form only — it's usually invisible and free. Keep it off `/confidential` for
+the reason at the top of this section.

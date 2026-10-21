@@ -1,13 +1,39 @@
 import { NextResponse } from 'next/server';
-import { sendMail, looksLikeSpam, clean, validEmail } from '@/lib/mail';
+import { sendMail, clean, validEmail } from '@/lib/mail';
+import {
+  looksLikeSpam, clientKey, rateLimit, withinBudget, budgetUsed,
+  firstTimeSeeing, contentLooksAutomated,
+} from '@/lib/guard';
 
 export const runtime = 'nodejs';
+
+/* Daily ceiling for this form alone.
+
+   Resend's allowance is shared with /confidential, and a bot once consumed
+   all of it before 9am. This cap means contact-form abuse can exhaust only
+   the contact form's share; a genuine confidential enquiry still gets
+   through. Forty is far above anything this firm sees in a real day — the
+   busiest legitimate day on record is nowhere near it — so it will only ever
+   bite during an attack. */
+const DAILY_MAX = 40;
+
+/* Every rejection returns ok:true.
+
+   Telling a bot it failed just invites a retry with the rule tweaked, and
+   the sender cannot tell the difference anyway. The one exception is a
+   malformed email address, which a real person needs to see so they can fix
+   it. */
+const ACCEPT = () => NextResponse.json({ ok: true });
 
 export async function POST(req: Request) {
   const form = await req.formData();
 
-  // Silently accept spam. Telling a bot it failed just invites a retry.
-  if (looksLikeSpam(form)) return NextResponse.json({ ok: true });
+  if (looksLikeSpam(form)) return ACCEPT();
+
+  const who = clientKey(req);
+  // A person sends one enquiry, occasionally two. Nobody sends four an hour.
+  if (!rateLimit(`c:h:${who}`, 3, 60 * 60 * 1000)) return ACCEPT();
+  if (!rateLimit(`c:d:${who}`, 8, 24 * 60 * 60 * 1000)) return ACCEPT();
 
   const email = clean(form, 'email', 200);
   if (!validEmail(email)) {
@@ -19,6 +45,21 @@ export async function POST(req: Request) {
   const phone = clean(form, 'phone', 60);
   const topic = clean(form, 'topic', 120);
   const message = clean(form, 'message');
+
+  if (contentLooksAutomated({ name, company, message })) return ACCEPT();
+
+  /* The attack was the same one or two names over and over, so identical
+     content arriving twice is the clearest signal available. A real person
+     re-sending because they weren't sure it worked is also served well by
+     this: they get the success they expect, and the inbox gets one copy. */
+  if (!firstTimeSeeing([name, email, message])) return ACCEPT();
+
+  if (!withinBudget('contact', DAILY_MAX)) {
+    /* Count only. No address, no content — this line exists so an unusual
+       day is visible in Render's logs, not to record who wrote in. */
+    console.warn('[contact] daily budget reached; dropping. used=', budgetUsed('contact'));
+    return ACCEPT();
+  }
 
   const body = [
     `Name:    ${name || '—'}`,
@@ -38,5 +79,5 @@ export async function POST(req: Request) {
   });
 
   if (!result.ok) return NextResponse.json(result, { status: 502 });
-  return NextResponse.json({ ok: true });
+  return ACCEPT();
 }
