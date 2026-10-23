@@ -852,3 +852,37 @@ to block at that layer; the fix has to be at the form.
 **If the bot adapts**, the next step is Cloudflare Turnstile on the contact
 form only — it's usually invisible and free. Keep it off `/confidential` for
 the reason at the top of this section.
+
+### Headline size and weight
+
+Page headlines (`.display-lg`, the `h1` on every page) are **4.75rem / 76px at
+weight 400**. They were 6rem / 96px at the inherited 600.
+
+Shane's note was that it read "too big, bold and bubbly" and pulled attention
+off the hero image. Measuring the live page agreed on all three counts: the
+headline filled 45–55% of the viewport, sat directly over Reunion Tower and
+the lit towers — the best part of the photograph — and on a 1366x768 laptop it
+pushed the hero's "Discuss a Search" button 29px below the fold.
+
+**The weight did most of the work.** Source Serif has soft, rounded ball
+terminals. At reading size that's what makes it feel refined; at 96px and
+weight 600 the bowls thicken and close up, and the whole headline goes soft —
+which is exactly what "bubbly" was describing. Regular keeps the typeface and
+loses the softness.
+
+`font-weight` is set on `.display-lg` rather than on the `h1, h2, h3` rule,
+and that difference is deliberate: smaller headings still want 600. Large
+display type needs **less** weight than small type to carry the same
+authority, so the two should not match. Don't "tidy" this by moving the
+weight up to the shared rule.
+
+Checked at 1440x900, 1366x768 and 390x844 across home, about, services,
+retained-search, careers and contact: 76px/400 on desktop, 39px/400 on a
+phone, nothing overflows, and the hero CTA now clears the fold at every size.
+
+The line breaks are unchanged — `max-width` is in `ch`, which scales with the
+font, so it is still four lines, just smaller. Going to three lines would mean
+changing that `max-width` and is a separate decision.
+
+Shane chose this over two alternatives that also dropped to one gold accent
+line. Both gold lines stay.

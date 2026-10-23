@@ -523,6 +523,7 @@ const ok  = (m) => console.log('  ok   ' + m);
   /* The two caps must fit inside the mail allowance with room to spare, or
      an attack still ends the day's sending. Resend's free tier is 100/day. */
   const caps = [contact, conf].map((s2) => Number(s2.match(/DAILY_MAX = (\d+)/)?.[1] ?? 0));
+  if (!/CONTACT_DAILY_MAX/.test(contact)) bad('contact route lost its CONTACT_DAILY_MAX kill switch');
   const total = caps.reduce((a, b) => a + b, 0);
   if (!caps.every(Boolean)) bad('a form route is missing its DAILY_MAX');
   else if (total > 90) bad(`form budgets total ${total}/day — too close to Resend's 100/day free tier`);

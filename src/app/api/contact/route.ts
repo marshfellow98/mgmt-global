@@ -15,7 +15,23 @@ export const runtime = 'nodejs';
    through. Forty is far above anything this firm sees in a real day — the
    busiest legitimate day on record is nowhere near it — so it will only ever
    bite during an attack. */
-const DAILY_MAX = 40;
+const DEFAULT_DAILY_MAX = 40;
+
+/* Emergency lever, settable from the Render dashboard with no code change.
+
+   Set CONTACT_DAILY_MAX=0 to stop this form mailing anyone, immediately, the
+   moment the service restarts. That matters because the alternative during
+   an attack is waiting for a build. The form keeps accepting and still looks
+   normal to a visitor; nothing is delivered.
+
+   Raise it back when the attack passes. /confidential has its own budget and
+   is unaffected by this value. */
+function dailyMax(): number {
+  const raw = process.env.CONTACT_DAILY_MAX;
+  if (raw === undefined || raw.trim() === '') return DEFAULT_DAILY_MAX;
+  const n = Number(raw);
+  return Number.isFinite(n) && n >= 0 ? n : DEFAULT_DAILY_MAX;
+}
 
 /* Every rejection returns ok:true.
 
@@ -54,7 +70,8 @@ export async function POST(req: Request) {
      this: they get the success they expect, and the inbox gets one copy. */
   if (!firstTimeSeeing([name, email, message])) return ACCEPT();
 
-  if (!withinBudget('contact', DAILY_MAX)) {
+  const max = dailyMax();
+  if (max === 0 || !withinBudget('contact', max)) {
     /* Count only. No address, no content — this line exists so an unusual
        day is visible in Render's logs, not to record who wrote in. */
     console.warn('[contact] daily budget reached; dropping. used=', budgetUsed('contact'));

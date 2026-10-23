@@ -102,7 +102,29 @@ p { margin: 0 0 1.1rem; color: #AEB8C2; }
 p:last-child { margin-bottom: 0; }
 
 .display { font-size: clamp(2rem, 5.2vw, 4.3rem); line-height: 1.04; margin: 0 0 1.8rem; max-width: 16ch; }
-.display-lg { font-size: clamp(2.4rem, 6.6vw, 6rem); line-height: 1.02; letter-spacing: -0.022em; max-width: 17ch; }
+/* Page headlines.
+
+   Was 6rem (96px) at the inherited weight 600. Shane's read was that it came
+   out "too big, bold and bubbly" and pulled attention off the hero image, and
+   measuring agreed: the headline filled 45-55% of the viewport and sat right
+   over Reunion Tower and the lit towers, and on a short laptop it pushed the
+   primary CTA below the fold.
+
+   Two changes, and the weight is the one doing most of the work. Source Serif
+   has soft, rounded ball terminals — refined at reading size, but at 96px and
+   weight 600 the bowls thicken and close up, which is exactly the "bubbly"
+   quality. Regular keeps the typeface and loses the softness.
+
+   font-weight is set HERE rather than on h1/h2/h3, deliberately: smaller
+   headings still want 600. Large display type needs less weight than small
+   type to read with the same authority, so the two should not match. */
+.display-lg {
+  font-size: clamp(2.4rem, 6.6vw, 4.75rem);   /* was 6rem */
+  font-weight: 400;                            /* was 600, inherited */
+  line-height: 1.02;
+  letter-spacing: -0.022em;
+  max-width: 17ch;
+}
 .accent { font-style: italic; color: var(--gold); }
 .sub { font-size: clamp(.98rem, 1.4vw, 1.1rem); color: #AFBAC4; max-width: 52ch; }
 

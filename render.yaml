@@ -39,6 +39,10 @@ services:
       # being typed into the dashboard. Change it here if the dashboard moves.
       - key: DASHBOARD_URL
         value: https://recruiter-dashboard-f8lz.onrender.com/
+      # Emergency lever. Leave blank normally; set to 0 to stop the contact
+      # form delivering mail without waiting for a deploy.
+      - key: CONTACT_DAILY_MAX
+        sync: false
 
   # --------------------------------------------------------------------------
   # Monthly newsletter draft.
