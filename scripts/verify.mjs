@@ -535,5 +535,41 @@ const ok  = (m) => console.log('  ok   ' + m);
   } else ok('/confidential still hashes nothing about the message');
 }
 
+// ---------- 25. Newsletter prefill must not end in whitespace ----------
+{
+  /* The job produced nothing for two months because the assistant prefill
+     was '# ' — with a trailing space — and the Anthropic API rejects every
+     request whose final assistant message ends in whitespace:
+     400 "messages: final assistant content cannot end with trailing
+     whitespace". The space is invisible in review and the failure was
+     silent, so this is checked mechanically. */
+  const src = readFileSync('jobs/newsletter.ts', 'utf8');
+  const prefill = src.match(/role: 'assistant', content: '([^']*)'/)?.[1];
+  if (prefill === undefined) bad('newsletter: assistant prefill not found');
+  else if (/\s$/.test(prefill)) {
+    bad(`newsletter: assistant prefill '${prefill}' ends in whitespace — the API rejects that with a 400`);
+  } else ok(`newsletter prefill '${prefill}' has no trailing whitespace`);
+
+  /* A failure has to reach a person. Logging and exit(1) is what let two
+     months pass unnoticed. */
+  if (!/async function reportFailure/.test(src)) {
+    bad('newsletter: no failure notification — a broken run would go unnoticed again');
+  } else if (!/sendMail/.test(src.slice(src.indexOf('async function reportFailure')))) {
+    bad('newsletter: reportFailure does not actually send mail');
+  } else ok('newsletter reports its own failures by email');
+}
+
+// ---------- 26. No test tooling in shipped dependencies ----------
+{
+  /* playwright is used for screenshots during development and has leaked
+     into dependencies twice, which makes Render install it on every build
+     of both the web service and the cron job for nothing. */
+  const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
+  const all = { ...(pkg.dependencies || {}), ...(pkg.devDependencies || {}) };
+  const leaked = ['playwright', 'playwright-core', '@playwright/test'].filter((d) => d in all);
+  if (leaked.length) bad(`${leaked.join(', ')} in package.json — test tooling, remove before shipping`);
+  else ok('no test tooling in package.json');
+}
+
 console.log(fail ? `\n${fail} problem(s) found.` : '\nAll checks passed.');
 process.exit(fail ? 1 : 0);

@@ -149,11 +149,17 @@ End the digest with exactly this footer:
 
 ${footerBlock}`,
       },
-      /* Prefilling the assistant turn with "# " forces the response to begin
+      /* Prefilling the assistant turn with "#" forces the response to begin
          mid-headline. The model physically cannot open with "Here's the
          digest for..." because it's already inside an H1 — which is what
-         was leaking through as a subtitle in the sent email. */
-      { role: 'assistant', content: '# ' },
+         was leaking through as a subtitle in the sent email.
+
+         NO TRAILING SPACE. This was '# ' and the API rejected every call
+         with 400 "final assistant content cannot end with trailing
+         whitespace", which is why no draft was produced in October or
+         November. The space is restored when the reply is stitched back
+         together below, so the heading still reads "# Title". */
+      { role: 'assistant', content: '#' },
     ],
   });
 
@@ -162,13 +168,19 @@ ${footerBlock}`,
     .join('')
     .trim();
 
-  /* The prefill means the response continues from "# ", so put it back.
-     Then drop anything before the first heading as a safety net — if a
-     preamble ever slips past the prefill, it should never reach a
-     subscriber. */
-  let text = raw.startsWith('#') ? raw : `# ${raw}`;
-  const firstHeading = text.indexOf('# ');
-  if (firstHeading > 0) text = text.slice(firstHeading);
+  /* The reply continues from "#", so put the hash back and normalise the
+     space after it — the model usually supplies one, but not always. */
+  let text = `#${raw}`.replace(/^#+\s*/, '# ');
+
+  /* Safety net from when a preamble could slip past the prefill: if the
+     first line is clearly prose rather than a title and a real heading
+     follows it, start at that heading instead. Only fires on an absurdly
+     long first line, so a genuine long-ish headline is left alone. */
+  const lines = text.split('\n');
+  const later = lines.findIndex((l, i) => i > 0 && /^#\s+\S/.test(l));
+  if (later > 0 && lines[0].length > 120) {
+    text = lines.slice(later).join('\n');
+  }
 
   const searches = message.content.filter(
     (b) => (b as { type: string }).type === 'server_tool_use'
@@ -239,13 +251,25 @@ async function notify(subject: string, url: string, words: number, searches: num
    Run
    --------------------------------------------------------------------------- */
 
+/** Run one step, tagging any error with the step's name. */
+async function step<T>(name: string, fn: () => Promise<T>): Promise<T> {
+  try {
+    return await fn();
+  } catch (err) {
+    if (err && typeof err === 'object') (err as { step?: string }).step = name;
+    throw err;
+  }
+}
+
 async function main() {
   console.log(`[newsletter] drafting ${ISSUE_NAME}, covering ${MONTH_NAME}`);
+
+  await step('preflight (credentials)', async () => preflight());
 
   const footer = await firmFooter();
   console.log(`[newsletter] firm footer: ${footer.openRoleCount} open roles`);
 
-  const { text, searches } = await draft(footer);
+  const { text, searches } = await step('drafting with the Anthropic API', () => draft(footer));
   const words = text.split(/\s+/).length;
   console.log(`[newsletter] drafted ${words} words from ${searches} searches`);
 
@@ -265,15 +289,87 @@ async function main() {
     monthCovered: MONTH_NAME,
   });
 
-  const saved = await saveDraft(subject, html);
+  const saved = await step('saving the draft to Buttondown', () => saveDraft(subject, html));
   const url = `https://buttondown.com/emails/${saved.id}`;
   console.log(`[newsletter] saved as draft ${saved.id}`);
 
-  await notify(subject, url, words, searches);
+  await step('emailing the review link', () => notify(subject, url, words, searches));
   console.log('[newsletter] Shane notified. Nothing sent to subscribers.');
 }
 
-main().catch((err) => {
-  console.error('[newsletter] FAILED:', err instanceof Error ? err.message : err);
-  process.exit(1);
-});
+/* ---------------------------------------------------------------------------
+   Failure reporting
+
+   This job went two months without producing a draft and nobody found out.
+   It did not fail silently in the sense of swallowing an error — it logged
+   one and exited 1 — but nothing TOLD anyone, so the only evidence was an
+   absence, which is the hardest thing to notice. A monthly job that reports
+   only to a log nobody opens is a job that can stop working indefinitely.
+
+   So: every failure now sends an email. Resend is a separate dependency from
+   Anthropic and Buttondown, so the two likeliest failures (model call,
+   Buttondown save) can still be reported. If Resend itself is the problem the
+   email cannot go out either — hence the loud log as a last resort.
+   --------------------------------------------------------------------------- */
+async function reportFailure(step: string, err: unknown) {
+  const detail = err instanceof Error ? err.message : String(err);
+  console.error(`[newsletter] FAILED at ${step}: ${detail}`);
+
+  try {
+    const { sendMail } = await import('../src/lib/mail');
+    const to = process.env.NEWSLETTER_EDITOR || process.env.CONFIDENTIAL_TO || '';
+    if (!to) {
+      console.error('[newsletter] no NEWSLETTER_EDITOR set — cannot report the failure by email');
+      return;
+    }
+    await sendMail({
+      to,
+      subject: `Newsletter draft FAILED — ${ISSUE_NAME}`,
+      body: [
+        `The ${ISSUE_NAME} digest did not get built, so there is nothing to review.`,
+        '',
+        `Failed at: ${step}`,
+        `Error:     ${detail}`,
+        '',
+        'Nothing was sent to subscribers, and no partial draft was saved.',
+        '',
+        'The full log is in Render -> mgmtglobal-newsletter -> Logs. Most likely:',
+        '  - "credit balance is too low" -> top up at console.anthropic.com',
+        '  - "invalid x-api-key" -> the Anthropic key was rotated or revoked',
+        '  - a Buttondown 401 -> that key was rotated',
+        '  - "model not found" -> the model id needs updating in jobs/newsletter.ts',
+      ].join('\n'),
+    });
+    console.error('[newsletter] failure reported by email');
+  } catch (mailErr) {
+    console.error(
+      '[newsletter] COULD NOT REPORT THE FAILURE BY EMAIL:',
+      mailErr instanceof Error ? mailErr.message : mailErr,
+    );
+  }
+}
+
+/* Check every credential up front and name ALL the missing ones at once.
+
+   Each step used to throw on its own missing key, so a run with two unset
+   variables reported one, got fixed, then failed again on the next. */
+function preflight() {
+  const required = ['ANTHROPIC_API_KEY', 'BUTTONDOWN_API_KEY', 'RESEND_API_KEY'];
+  const missing = required.filter((k) => !(process.env[k] || '').trim());
+  if (!(process.env.NEWSLETTER_EDITOR || process.env.CONFIDENTIAL_TO || '').trim()) {
+    missing.push('NEWSLETTER_EDITOR (or CONFIDENTIAL_TO)');
+  }
+  if (missing.length) {
+    throw new Error(`not set in the Render environment: ${missing.join(', ')}`);
+  }
+  console.log('[newsletter] preflight ok — all credentials present');
+}
+
+main()
+  .catch(async (err) => {
+    /* `step` is attached by main() so the email can say where it broke
+       rather than just that it broke. */
+    const step = (err as { step?: string })?.step ?? 'an unknown step';
+    await reportFailure(step, err);
+    process.exit(1);
+  });

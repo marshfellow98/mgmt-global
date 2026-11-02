@@ -886,3 +886,46 @@ changing that `max-width` and is a separate decision.
 
 Shane chose this over two alternatives that also dropped to one gold accent
 line. Both gold lines stay.
+
+
+### Why the newsletter produced nothing in October and November
+
+The Anthropic call failed every time with:
+
+```
+400 invalid_request_error
+messages: final assistant content cannot end with trailing whitespace
+```
+
+The assistant prefill was `{ role: 'assistant', content: '# ' }` — **with a
+trailing space.** The API rejects any request whose final assistant message
+ends in whitespace, so no draft was ever built. It is now `'#'`, and the space
+is restored when the reply is stitched back: `` `#${raw}`.replace(/^#+\s*/, '# ') ``
+— the `+` matters, because the model sometimes repeats the hash and `/^#\s*/`
+left `# # Title`. Four cases are covered: the model leading with a space, with
+no space, repeating the hash, and emitting a preamble before a real heading.
+verify.mjs check 25 fails on a prefill ending in whitespace, since a trailing
+space is invisible in review.
+
+**The worse bug was that nobody found out.** `main().catch()` logged the error
+and exited 1, so the only evidence was an absence — the hardest thing to
+notice, and why two issues were missed rather than one. Every failure now
+emails `NEWSLETTER_EDITOR`, says which step broke, and lists the likely causes.
+Resend is independent of Anthropic and Buttondown, so the two likeliest
+failures can still be reported; if Resend is itself the problem the email
+cannot go out, hence the loud log as a last resort. `preflight()` also checks
+all credentials up front and names every missing one at once, rather than
+failing on the first.
+
+### Two things the same log settled
+
+**`last_opened` is the Recruiterflow date field.** The run printed
+`"date_field":"last_opened"`, confirming the guess recorded under AEO/GEO. The
+`DATE_FIELDS` list can be trimmed to that one name and the JobPosting markup
+will start emitting.
+
+**The feed returns 56 open roles.** `records returned: 56` and `after
+filtering: 56` — nothing is being filtered out, because the only filter is
+`is_open !== false`. Worth checking against Recruiterflow whether 56 is really
+the number of live external searches; if it includes internal or stale roles,
+the careers board and the newsletter footer are both overstating it.
