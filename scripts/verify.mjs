@@ -535,20 +535,34 @@ const ok  = (m) => console.log('  ok   ' + m);
   } else ok('/confidential still hashes nothing about the message');
 }
 
-// ---------- 25. Newsletter prefill must not end in whitespace ----------
+// ---------- 25. Newsletter must not rely on an assistant prefill ----------
 {
-  /* The job produced nothing for two months because the assistant prefill
-     was '# ' — with a trailing space — and the Anthropic API rejects every
-     request whose final assistant message ends in whitespace:
-     400 "messages: final assistant content cannot end with trailing
-     whitespace". The space is invisible in review and the failure was
-     silent, so this is checked mechanically. */
-  const src = readFileSync('jobs/newsletter.ts', 'utf8');
-  const prefill = src.match(/role: 'assistant', content: '([^']*)'/)?.[1];
-  if (prefill === undefined) bad('newsletter: assistant prefill not found');
-  else if (/\s$/.test(prefill)) {
-    bad(`newsletter: assistant prefill '${prefill}' ends in whitespace — the API rejects that with a 400`);
-  } else ok(`newsletter prefill '${prefill}' has no trailing whitespace`);
+  /* Two months of issues were lost to one technique. The job ended its
+     messages with { role: 'assistant', content: '# ' } to force the reply to
+     begin mid-headline, and the API rejected it twice over:
+
+       - '# ' -> 400 "final assistant content cannot end with trailing
+         whitespace"
+       - '#'  -> 400 "This model does not support assistant message prefill.
+         The conversation must end with a user message."
+
+     A prefill is a per-model capability that can be withdrawn without
+     warning, so the preamble guard lives in post-processing now. This check
+     stops anyone putting it back. */
+  const raw = readFileSync('jobs/newsletter.ts', 'utf8');
+  const src = raw.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+
+  if (/role:\s*'assistant'/.test(src)) {
+    bad("newsletter: an assistant prefill is back — the model rejects it with a 400");
+  } else ok('newsletter sends no assistant prefill');
+
+  /* The first line becomes the email subject and masthead, so a preamble
+     there is what subscribers read as the headline. */
+  if (!/\/\^#\\s\+\\S\//.test(src) || !/findIndex/.test(src)) {
+    bad('newsletter: no longer slices to the first H1 — a preamble could become the subject');
+  } else if (!/The Market Brief —/.test(src)) {
+    bad('newsletter: no fallback title, so prose could become the subject when the model emits no H1');
+  } else ok('newsletter strips any preamble and never promotes prose to the subject');
 
   /* A failure has to reach a person. Logging and exit(1) is what let two
      months pass unnoticed. */

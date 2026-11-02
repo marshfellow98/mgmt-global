@@ -428,10 +428,11 @@ some clients invert it.
 
 **Two bugs worth not reintroducing:**
 
-The model's preamble was leaking into the sent email as a subtitle. Fixed by
-prefilling the assistant turn with `# `, so the response begins mid-heading
-and physically cannot open with "Here's the digest…". There's a second guard
-that strips anything before the first heading.
+The model's preamble was leaking into the sent email as a subtitle. This was
+originally fixed with an assistant prefill; that turned out to be
+unsupported and cost two months of issues — see **Why the newsletter produced
+nothing in October and November** below. The guard is now post-processing:
+everything before the first H1 is dropped.
 
 The Markdown converter originally treated every source line as a paragraph,
 which broke wrapped sentences into fragments. It now buffers lines and
@@ -890,32 +891,51 @@ line. Both gold lines stay.
 
 ### Why the newsletter produced nothing in October and November
 
-The Anthropic call failed every time with:
+One technique, rejected twice. The job ended its `messages` array with an
+assistant prefill, to force the reply to begin mid-headline so it could not
+open with "Here's the digest for..." — the preamble that had once rendered as
+the email's subtitle.
 
 ```
-400 invalid_request_error
-messages: final assistant content cannot end with trailing whitespace
+'# '  ->  400 "messages: final assistant content cannot end with trailing whitespace"
+'#'   ->  400 "This model does not support assistant message prefill.
+                The conversation must end with a user message."
 ```
 
-The assistant prefill was `{ role: 'assistant', content: '# ' }` — **with a
-trailing space.** The API rejects any request whose final assistant message
-ends in whitespace, so no draft was ever built. It is now `'#'`, and the space
-is restored when the reply is stitched back: `` `#${raw}`.replace(/^#+\s*/, '# ') ``
-— the `+` matters, because the model sometimes repeats the hash and `/^#\s*/`
-left `# # Title`. Four cases are covered: the model leading with a space, with
-no space, repeating the hash, and emitting a preamble before a real heading.
-verify.mjs check 25 fails on a prefill ending in whitespace, since a trailing
-space is invisible in review.
+The first failure is what killed October and November: a **trailing space**,
+invisible in review. Removing it only exposed the real constraint — this model
+does not accept an assistant turn at all. Both diagnoses came from the Render
+cron log, which stated the error verbatim each time.
+
+**There is no prefill now, and there should never be one again.** A prefill is
+a per-model capability that can be withdrawn without notice, and it was
+guarding something post-processing handles on any model. The digest's first
+line becomes both the email subject and its masthead, so the guard is:
+
+- slice to the first line matching `/^#\s+\S/` and drop everything above it;
+- if the model emitted no H1 at all, prepend the fallback title rather than
+  letting the opening line of prose become the subject.
+
+Tested against five shapes: clean H1 first, a one-line preamble, a multi-line
+preamble, H2-only, and no headings at all. In every case the subject comes out
+as a real title. verify.mjs check 25 now fails if an assistant prefill
+reappears, if the H1 slice is removed, or if the fallback title goes.
 
 **The worse bug was that nobody found out.** `main().catch()` logged the error
 and exited 1, so the only evidence was an absence — the hardest thing to
 notice, and why two issues were missed rather than one. Every failure now
-emails `NEWSLETTER_EDITOR`, says which step broke, and lists the likely causes.
-Resend is independent of Anthropic and Buttondown, so the two likeliest
-failures can still be reported; if Resend is itself the problem the email
-cannot go out, hence the loud log as a last resort. `preflight()` also checks
-all credentials up front and names every missing one at once, rather than
-failing on the first.
+emails `NEWSLETTER_EDITOR`, names the step that broke, and lists likely causes;
+the first run after the change reported itself correctly ("failure reported by
+email"). Resend is independent of Anthropic and Buttondown, so the two
+likeliest failures can still be reported; if Resend is itself the problem the
+email cannot go out, hence the loud log as a last resort. `preflight()` checks
+all credentials up front and names every missing one at once.
+
+**`claude-sonnet-4-6` was not the problem.** It was the first suspect — a job
+that worked in September and failed in October looks like a retired model —
+but Anthropic's deprecation page lists it as active with no retirement before
+February 2027. Checking that before changing it is what kept a non-bug from
+being "fixed" while the real one stayed in.
 
 ### Two things the same log settled
 

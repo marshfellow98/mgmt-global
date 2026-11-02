@@ -147,19 +147,28 @@ Only write about what you find. If a section is thin, cut it.
 
 End the digest with exactly this footer:
 
-${footerBlock}`,
-      },
-      /* Prefilling the assistant turn with "#" forces the response to begin
-         mid-headline. The model physically cannot open with "Here's the
-         digest for..." because it's already inside an H1 — which is what
-         was leaking through as a subtitle in the sent email.
+${footerBlock}
 
-         NO TRAILING SPACE. This was '# ' and the API rejected every call
-         with 400 "final assistant content cannot end with trailing
-         whitespace", which is why no draft was produced in October or
-         November. The space is restored when the reply is stitched back
-         together below, so the heading still reads "# Title". */
-      { role: 'assistant', content: '#' },
+Begin your reply with the issue's H1 headline and nothing before it — the
+first line must start with "# ". Any sentence before that heading ends up
+rendered as a subtitle in the email that goes out.`,
+      },
+      /* NO ASSISTANT PREFILL.
+
+         This used to end with { role: 'assistant', content: '# ' }, to force
+         the reply to begin mid-headline so it could not open with "Here's
+         the digest for...". That cost two months of issues:
+
+           - '# ' was rejected outright: 400 "final assistant content cannot
+             end with trailing whitespace".
+           - with the space removed, the model rejected the technique
+             itself: 400 "This model does not support assistant message
+             prefill. The conversation must end with a user message."
+
+         So the preamble is stripped after the fact instead (see below),
+         which is where the guard belonged anyway: post-processing works on
+         any model, and a prefill is a per-model capability that can be
+         withdrawn without warning. Do not reintroduce one. */
     ],
   });
 
@@ -168,19 +177,21 @@ ${footerBlock}`,
     .join('')
     .trim();
 
-  /* The reply continues from "#", so put the hash back and normalise the
-     space after it — the model usually supplies one, but not always. */
-  let text = `#${raw}`.replace(/^#+\s*/, '# ');
+  /* Strip any preamble.
 
-  /* Safety net from when a preamble could slip past the prefill: if the
-     first line is clearly prose rather than a title and a real heading
-     follows it, start at that heading instead. Only fires on an absurdly
-     long first line, so a genuine long-ish headline is left alone. */
-  const lines = text.split('\n');
-  const later = lines.findIndex((l, i) => i > 0 && /^#\s+\S/.test(l));
-  if (later > 0 && lines[0].length > 120) {
-    text = lines.slice(later).join('\n');
-  }
+     The first line of the digest becomes the email's subject AND its
+     masthead, so a stray "Here's the October digest:" would be read as the
+     headline — which is exactly what subscribers saw once before. Slice to
+     the first real H1 and drop everything above it.
+
+     If the model produced no H1 at all, do NOT let the opening line of prose
+     become the subject: give it the fallback title and keep the body whole. */
+  const lines = raw.split('\n');
+  const h1 = lines.findIndex((l) => /^#\s+\S/.test(l));
+  const text =
+    h1 >= 0
+      ? lines.slice(h1).join('\n').trim()
+      : `# The Market Brief — ${MONTH_NAME}\n\n${raw}`;
 
   const searches = message.content.filter(
     (b) => (b as { type: string }).type === 'server_tool_use'
